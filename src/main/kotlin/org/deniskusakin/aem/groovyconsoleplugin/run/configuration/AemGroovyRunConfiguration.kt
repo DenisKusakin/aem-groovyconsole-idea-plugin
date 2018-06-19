@@ -14,7 +14,7 @@ import com.intellij.openapi.project.Project
  */
 class AemGroovyRunConfiguration(project: Project, factory: ConfigurationFactory, name: String?) : RunConfigurationBase(project, factory, name) {
     override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return AemGroovySettingsEditor()
     }
 
     override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState? {

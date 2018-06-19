@@ -26,7 +26,7 @@ class AemGroovyConfigurationType : ConfigurationType{
     }
 
     override fun getConfigurationFactories(): Array<ConfigurationFactory> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        ConfigurationFactory[]{}
     }
 
 }
