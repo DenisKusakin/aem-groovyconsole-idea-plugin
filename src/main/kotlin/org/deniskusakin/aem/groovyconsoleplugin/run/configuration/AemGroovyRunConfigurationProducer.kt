@@ -8,11 +8,10 @@ import com.intellij.psi.PsiElement
 
 class AemGroovyRunConfigurationProducer(configurationType: ConfigurationType?) : RunConfigurationProducer<AemGroovyRunConfiguration>(configurationType) {
     override fun isConfigurationFromContext(configuration: AemGroovyRunConfiguration?, context: ConfigurationContext?): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return true
     }
 
     override fun setupConfigurationFromContext(configuration: AemGroovyRunConfiguration?, context: ConfigurationContext?, sourceElement: Ref<PsiElement>?): Boolean {
-        context.location.
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return true
     }
 }

@@ -18,11 +18,11 @@ class AemGroovyConfigurationType : ConfigurationType{
     }
 
     override fun getId(): String {
-        return "AEM_GROOVYCONSOLE_CONFIGURATION"
+        return "AEM_GROOVY_CONSOLE_CONFIGURATION"
     }
 
     override fun getDisplayName(): String {
-        return "AEM GroovyConsole Configuration2"
+        return "AEM GroovyConsole Configuration"
     }
 
     override fun getConfigurationFactories(): Array<ConfigurationFactory> {

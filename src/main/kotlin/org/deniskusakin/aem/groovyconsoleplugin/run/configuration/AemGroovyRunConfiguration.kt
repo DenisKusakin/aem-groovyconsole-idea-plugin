@@ -11,7 +11,7 @@ import com.intellij.openapi.project.Project
  */
 class AemGroovyRunConfiguration(project: Project, factory: ConfigurationFactory, name: String?) : LocatableConfigurationBase(project, factory, name) {
     override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> {
-        return AemGroovySettingsEditor()
+        return AemGroovySettingsEditor(project)
     }
 
     override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState? {
