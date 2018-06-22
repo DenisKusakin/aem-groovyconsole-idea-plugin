@@ -1,1 +1,1 @@
-println "Hello from AEM groovyconsole"
+println "T"
