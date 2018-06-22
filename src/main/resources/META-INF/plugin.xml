@@ -17,8 +17,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <configurationType
                 implementation="org.deniskusakin.aem.groovyconsoleplugin.run.configuration.AemGroovyConfigurationType"/>
-        <!--<runConfigurationProducer-->
-                <!--implementation="org.deniskusakin.aem.groovyconsoleplugin.run.configuration.AemGroovyRunConfigurationProducer"/>-->
+        <runConfigurationProducer
+                implementation="org.deniskusakin.aem.groovyconsoleplugin.run.configuration.AemGroovyRunConfigurationProducer"/>
         <!--<editorNotificationProvider implementation="org.deniskusakin.aem.groovyconsoleplugin.console.EditorDecorator"/>-->
         <!-- Add your extensions here -->
     </extensions>

@@ -6,12 +6,19 @@ import com.intellij.execution.configurations.ConfigurationType
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiElement
 
-class AemGroovyRunConfigurationProducer(configurationType: ConfigurationType?) : RunConfigurationProducer<AemGroovyRunConfiguration>(configurationType) {
+class AemGroovyRunConfigurationProducer private constructor() : RunConfigurationProducer<AemGroovyRunConfiguration>(AemGroovyConfigurationType()) {
     override fun isConfigurationFromContext(configuration: AemGroovyRunConfiguration?, context: ConfigurationContext?): Boolean {
-        return true
+        return false
     }
 
-    override fun setupConfigurationFromContext(configuration: AemGroovyRunConfiguration?, context: ConfigurationContext?, sourceElement: Ref<PsiElement>?): Boolean {
-        return true
+    override fun setupConfigurationFromContext(configuration: AemGroovyRunConfiguration, context: ConfigurationContext, sourceElement: Ref<PsiElement>?): Boolean {
+        if (context.location?.virtualFile?.extension == "groovy") {
+            configuration.scriptPath = context.location?.virtualFile?.path
+            configuration.serverHost = "http://localhost:4502"
+            configuration.login = "admin"
+            configuration.password = "admin"
+            return true
+        }
+        return false
     }
 }
