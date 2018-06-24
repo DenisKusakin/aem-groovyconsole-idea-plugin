@@ -19,6 +19,8 @@
                 implementation="org.deniskusakin.aem.groovyconsoleplugin.run.configuration.AemGroovyConfigurationType"/>
         <runConfigurationProducer
                 implementation="org.deniskusakin.aem.groovyconsoleplugin.run.configuration.AemGroovyRunConfigurationProducer"/>
+        <applicationConfigurable groupId="tools"
+                                 instance="org.deniskusakin.aem.groovyconsoleplugin.config.AemServersConfigurable"/>
         <!--<editorNotificationProvider implementation="org.deniskusakin.aem.groovyconsoleplugin.console.EditorDecorator"/>-->
         <!-- Add your extensions here -->
     </extensions>
