@@ -40,9 +40,10 @@ class AemServersConfigurable : Configurable {
                 }
             }
             val toolbarDecorator = ToolbarDecorator.createDecorator(serversListComponent).disableUpDownActions()
-            toolbarDecorator.setAddAction({
+            toolbarDecorator.setAddAction {
                 addNewServer()
-            })
+            }
+            toolbarDecorator.setRemoveAction { }
             row {
                 toolbarDecorator.createPanel()(CCFlags.grow, CCFlags.push)
             }
@@ -67,6 +68,10 @@ class AemServersConfigurable : Configurable {
         (serversListComponent.model as CollectionListModel).add(newAemServer)
         myServerEditor.add(getEditor(newAemServer), newServerName)
         serversListComponent.selectedIndex = (serversListComponent.model as CollectionListModel).size - 1
+    }
+
+    private fun removeServer() {
+        
     }
 
     class CellRenderer : ColoredListCellRenderer<AemServerConfig>() {
