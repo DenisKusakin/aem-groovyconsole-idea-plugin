@@ -50,7 +50,7 @@ class AemServersConfigurable(val project: Project) : Configurable {
                 toolbarDecorator.createPanel()(CCFlags.grow, CCFlags.push)
             }
             row {
-                myServerEditor()
+                myServerEditor(CCFlags.grow)
             }
         }
     }
