@@ -1,5 +1,7 @@
 package org.deniskusakin.aem.groovyconsoleplugin.console
 
+import com.beust.klaxon.Klaxon
+import com.google.gson.Gson
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.ExecutionManager
 import com.intellij.execution.configurations.GeneralCommandLine
@@ -11,6 +13,7 @@ import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.project.Project
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.execution.ui.actions.CloseAction
+import com.intellij.execution.util.ExecUtil
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
@@ -67,13 +70,13 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
 //        val consoleStateService = GroovyConsoleStateService.getInstance(project)
 //        consoleStateService.setFileModule(contentFile, module)
 //        val title = consoleStateService.getSelectedModuleTitle(contentFile)
-            val title = "QQQQQQQQQQ"
+            val title = "ServerName:${contentFile.name}"
             val consoleView = ConsoleViewImpl(project, true)
             val descriptor = RunContentDescriptor(consoleView, processHandler, JPanel(BorderLayout()), title)
             val console = AEMGroovyConsole(project, descriptor, consoleView, processHandler)
 
             // must call getComponent before createConsoleActions()
-            val consoleViewComponent = consoleView.getComponent()
+            val consoleViewComponent = consoleView.component
 
 //        val actionGroup = DefaultActionGroup()
 //        actionGroup.add(BuildAndRestartConsoleAction(module, project, defaultExecutor, descriptor, restarter(project, contentFile)))
@@ -93,7 +96,7 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
             ui.add(consoleViewComponent, BorderLayout.CENTER)
 //        ui.add(toolbar.component, BorderLayout.WEST)
 
-            processHandler!!.addProcessListener(object : ProcessAdapter() {
+            processHandler.addProcessListener(object : ProcessAdapter() {
                 override fun processTerminated(event: ProcessEvent) {
                     if (contentFile.getUserData<AEMGroovyConsole>(GROOVY_CONSOLE) === console) {
                         // process terminated either by closing file or by close action
@@ -103,8 +106,27 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
             })
 
             contentFile.putUserData<AEMGroovyConsole>(GROOVY_CONSOLE, console)
-            consoleView.attachToProcess(processHandler)
-            processHandler!!.startNotify()
+//            consoleView.attachToProcess(processHandler)
+            processHandler.addProcessListener(object : ProcessAdapter() {
+                override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                    super.onTextAvailable(event, outputType)
+                    if (event.text.startsWith("curl")) return
+//                    val result = Gson()
+//                            .fromJson<CurlOutput>(event.text, CurlOutput::class.java)
+////                            .parse<CurlOutput>(event.text)
+//                    consoleView.print("Time: ${result?.runningTime ?: ""}", ConsoleViewContentType.LOG_WARNING_OUTPUT)
+                    consoleView.print("\n--------------------------------------\n", ConsoleViewContentType.NORMAL_OUTPUT)
+                    consoleView.print(event.text, ConsoleViewContentType.NORMAL_OUTPUT)
+                    consoleView.print("\n---------------------\n", ConsoleViewContentType.NORMAL_OUTPUT)
+//                    if (!result?.exceptionStackTrace.isNullOrEmpty()) {
+//                        consoleView.print(result?.exceptionStackTrace ?: "", ConsoleViewContentType.ERROR_OUTPUT)
+//                    } else {
+//                        consoleView.print(result?.output ?: "", ConsoleViewContentType.NORMAL_OUTPUT)
+//                    }
+                }
+            })
+
+            processHandler.startNotify()
 
             ExecutionManager.getInstance(project).contentManager.showRunContent(defaultExecutor, descriptor)
             return console
@@ -133,6 +155,7 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
 
             val commandLine = GeneralCommandLine("curl", "-u", "$login:$password", "--data-urlencode", "script@$scriptPath", "-X", "POST", "-H", "Content-Type: application/x-www-form-urlencoded; charset=UTF-8", "$serverHost/bin/groovyconsole/post.json")
                     .withParameters("-s")
+            ExecUtil.execAndGetOutput(commandLine)
             val processHandler = OSProcessHandler(commandLine)
             processHandler.setShouldDestroyProcessRecursively(false)
             return processHandler
@@ -154,5 +177,7 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
         if (!StringUtil.isEmptyOrSpaces(command)) doExecute(command)
         ExecutionManager.getInstance(project).contentManager.toFrontRunContent(defaultExecutor, descriptor)
     }
+
+    data class CurlOutput(val output: String, val runningTime: String, val exceptionStackTrace: String)
 
 }
