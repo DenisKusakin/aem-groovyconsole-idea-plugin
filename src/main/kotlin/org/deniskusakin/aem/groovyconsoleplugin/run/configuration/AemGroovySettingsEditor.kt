@@ -1,48 +1,52 @@
 package org.deniskusakin.aem.groovyconsoleplugin.run.configuration
 
+import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
+import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.layout.CCFlags
 import com.intellij.ui.layout.LCFlags
 import com.intellij.ui.layout.panel
+import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 
 import javax.swing.*
 
 class AemGroovySettingsEditor(private val project: Project) : SettingsEditor<AemGroovyRunConfiguration>() {
     private var contentPane: JPanel
-    private lateinit var  serverHost: JTextField
-    private lateinit var loginField: JTextField
-    private lateinit var passwordField: JPasswordField
-    private var scriptPath: TextFieldWithBrowseButton
+    private val scriptPath: TextFieldWithBrowseButton = TextFieldWithBrowseButton()
+    private val aemServerComboBox = ComboBox<String>()
+    private val service = ServiceManager.getService(project, PersistentStateService::class.java)
+    private val items = service.getAEMServers().map { it.name }
 
     init {
-        scriptPath = TextFieldWithBrowseButton()
+//        val service = ServiceManager.getService(project, PersistentStateService::class.java)
+//        val items = service.getAEMServers().map { it.name }
+        aemServerComboBox.model = CollectionComboBoxModel(items)
 
-        contentPane = panel{
+        contentPane = panel {
             //TODO: Check AppearanceConfigurable to get info about ComboBox
-            row(label = "Script Path: "){
+            row(label = "Script Path: ") {
                 scriptPath(CCFlags.grow, CCFlags.push)
-
+            }
+            row(label = "AEM Server: ") {
+                aemServerComboBox(CCFlags.grow, CCFlags.push)
             }
         }
     }
 
     override fun resetEditorFrom(s: AemGroovyRunConfiguration) {
-//        serverHost.text = s.serverHost
-//        loginField.text = s.login
-//        passwordField.text = s.password
         scriptPath.text = s.scriptPath ?: ""
+        aemServerComboBox.editor.item = s.name
     }
 
     @Throws(ConfigurationException::class)
     override fun applyEditorTo(runConfiguration: AemGroovyRunConfiguration) {
-//        runConfiguration.serverHost = serverHost.text
-//        runConfiguration.login = loginField.text
-//        runConfiguration.password = passwordField.text
         runConfiguration.scriptPath = scriptPath.text
+        runConfiguration.serverName = aemServerComboBox.editor.item as String?
     }
 
     override fun createEditor(): JComponent {
@@ -54,4 +58,5 @@ class AemGroovySettingsEditor(private val project: Project) : SettingsEditor<Aem
     private fun createUIComponents() {
         // TODO: place custom component creation code here
     }
+
 }

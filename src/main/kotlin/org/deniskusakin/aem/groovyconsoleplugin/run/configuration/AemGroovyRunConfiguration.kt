@@ -1,45 +1,65 @@
 package org.deniskusakin.aem.groovyconsoleplugin.run.configuration
 
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.*
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.ExecutionEnvironment
+import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.JDOMExternalizer
+import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 import org.jdom.Element
 
 /**
  * @author Denis_Kusakin. 6/19/2018.
  */
 class AemGroovyRunConfiguration(project: Project, factory: ConfigurationFactory, name: String?) : LocatableConfigurationBase(project, factory, name) {
-    var serverHost: String? = null
-    var login: String? = null
-    var password: String? = null
+    private var serverUrl: String? = null
+    private var login: String? = null
+    private var password: String? = null
     var scriptPath: String? = null
+    var serverName: String? = null
+        set(value) {
+            field = value
+            val service = ServiceManager.getService(project, PersistentStateService::class.java)
+            val serverInfo = service.getAEMServers().find { it.name == serverName }
+            serverUrl = serverInfo?.url
+            login = serverInfo?.login
+            password = serverInfo?.password
+        }
 
     override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> {
         return AemGroovySettingsEditor(project)
     }
 
     override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState? {
-        return GrState(environment, serverHost ?: "http://localhost:4502", login ?: "admin2", password ?: "admin2", scriptPath ?: "")
+        if (serverUrl == null) {
+            throw ExecutionException("Server Host is not defined")
+        }
+        if (login == null) {
+            throw ExecutionException("Login is not defined")
+        }
+        if (password == null) {
+            throw ExecutionException("Password is not defined")
+        }
+        if (scriptPath == null) {
+            throw ExecutionException("Script is not defined")
+        }
+        return GrState(environment, serverUrl!!, login!!, password!!, scriptPath!!)
     }
 
     override fun readExternal(element: Element) {
         super.readExternal(element)
         scriptPath = JDOMExternalizer.readString(element, "scriptPath")
-        serverHost = JDOMExternalizer.readString(element, "server")
-        login = JDOMExternalizer.readString(element, "login")
-        password = JDOMExternalizer.readString(element, "password")
+        serverName = JDOMExternalizer.readString(element, "serverName")
     }
 
     override fun writeExternal(element: Element) {
         super.writeExternal(element)
-        JDOMExternalizer.write(element, "server", serverHost)
-        JDOMExternalizer.write(element, "login", login)
-        JDOMExternalizer.write(element, "password", password)
+        JDOMExternalizer.write(element, "serverName", serverName)
         JDOMExternalizer.write(element, "scriptPath", scriptPath)
     }
 }

@@ -9,13 +9,12 @@ import com.intellij.openapi.project.Project
  * @author Denis_Kusakin. 6/19/2018.
  */
 class AemGroovyConfigurationFactory(type: ConfigurationType) : ConfigurationFactory(type) {
-    private val FACTORY_NAME = "AEM Groovy Configuration Factory"
 
     override fun createTemplateConfiguration(project: Project): RunConfiguration {
-        return AemGroovyRunConfiguration(project, this, "AEM Groovy")
+        return AemGroovyRunConfiguration(project, this, "AEM Groovy Console")
     }
 
     override fun getName(): String {
-        return FACTORY_NAME
+        return "AEM Groovy Configuration Factory"
     }
 }
