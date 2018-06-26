@@ -10,9 +10,13 @@ import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 
 class AemGroovyRunConfigurationProducer private constructor() : RunConfigurationProducer<AemGroovyRunConfiguration>(AemGroovyConfigurationType()) {
     override fun isConfigurationFromContext(configuration: AemGroovyRunConfiguration, context: ConfigurationContext): Boolean {
-//        if (context.location?.virtualFile?.path == configuration.scriptPath) {
-////            return true
-////        }
+        val service = ServiceManager.getService(context.project, PersistentStateService::class.java)
+        val firstServerFromGlobalConfig = service.getAEMServers().firstOrNull()
+
+        if (context.location?.virtualFile?.path == configuration.scriptPath && configuration.serverName == firstServerFromGlobalConfig?.name) {
+            return true
+        }
+
         return false
     }
 
@@ -21,10 +25,7 @@ class AemGroovyRunConfigurationProducer private constructor() : RunConfiguration
         val firstServerFromGlobalConfig = service.getAEMServers().firstOrNull()
         if (context.location?.virtualFile?.extension == "groovy" && firstServerFromGlobalConfig != null) {
             configuration.scriptPath = context.location?.virtualFile?.path
-            configuration.serverName = firstServerFromGlobalConfig.name
-//            configuration.serverHost = "http://localhost:4502"
-//            configuration.login = "admin"
-//            configuration.password = "admin"
+            configuration.serverName = configuration.serverName ?: firstServerFromGlobalConfig.name
             configuration.name = "${firstServerFromGlobalConfig.name}:${context.location?.virtualFile?.name}"
 
             return true

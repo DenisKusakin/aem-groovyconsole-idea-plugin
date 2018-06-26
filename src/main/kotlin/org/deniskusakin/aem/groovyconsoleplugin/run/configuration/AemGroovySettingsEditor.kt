@@ -9,7 +9,6 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.layout.CCFlags
-import com.intellij.ui.layout.LCFlags
 import com.intellij.ui.layout.panel
 import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 
@@ -18,15 +17,12 @@ import javax.swing.*
 class AemGroovySettingsEditor(private val project: Project) : SettingsEditor<AemGroovyRunConfiguration>() {
     private var contentPane: JPanel
     private val scriptPath: TextFieldWithBrowseButton = TextFieldWithBrowseButton()
-    private val aemServerComboBox = ComboBox<String>()
     private val service = ServiceManager.getService(project, PersistentStateService::class.java)
-    private val items = service.getAEMServers().map { it.name }
+    private val items = service.getAEMServers().map { it.name } + ""
+    private val aemServerComboBox = ComboBox<String>(items.toTypedArray())
 
     init {
-//        val service = ServiceManager.getService(project, PersistentStateService::class.java)
-//        val items = service.getAEMServers().map { it.name }
-        aemServerComboBox.model = CollectionComboBoxModel(items)
-
+//        aemServerComboBox.model = CollectionComboBoxModel(items)
         contentPane = panel {
             //TODO: Check AppearanceConfigurable to get info about ComboBox
             row(label = "Script Path: ") {
@@ -40,23 +36,24 @@ class AemGroovySettingsEditor(private val project: Project) : SettingsEditor<Aem
 
     override fun resetEditorFrom(s: AemGroovyRunConfiguration) {
         scriptPath.text = s.scriptPath ?: ""
-        aemServerComboBox.editor.item = s.name
+        aemServerComboBox.selectedIndex = items.indexOf(s.serverName)
     }
 
-    @Throws(ConfigurationException::class)
     override fun applyEditorTo(runConfiguration: AemGroovyRunConfiguration) {
+        if (scriptPath.text.isBlank()) {
+            throw ConfigurationException("Script Path is not defined")
+        }
+        if((aemServerComboBox.selectedItem as String?).isNullOrBlank()){
+            throw ConfigurationException("AEM Server is not specified")
+        }
         runConfiguration.scriptPath = scriptPath.text
-        runConfiguration.serverName = aemServerComboBox.editor.item as String?
+        runConfiguration.serverName = aemServerComboBox.selectedItem as String?
     }
 
     override fun createEditor(): JComponent {
         val fileChooserDescriptor = FileChooserDescriptor(true, false, false, false, false, false)
         scriptPath.addBrowseFolderListener("title", "desc", project, fileChooserDescriptor)
         return contentPane
-    }
-
-    private fun createUIComponents() {
-        // TODO: place custom component creation code here
     }
 
 }

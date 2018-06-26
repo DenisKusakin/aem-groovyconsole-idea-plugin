@@ -17,19 +17,20 @@ import org.jdom.Element
  * @author Denis_Kusakin. 6/19/2018.
  */
 class AemGroovyRunConfiguration(project: Project, factory: ConfigurationFactory, name: String?) : LocatableConfigurationBase(project, factory, name) {
-    private var serverUrl: String? = null
-    private var login: String? = null
-    private var password: String? = null
     var scriptPath: String? = null
     var serverName: String? = null
         set(value) {
             field = value
             val service = ServiceManager.getService(project, PersistentStateService::class.java)
-            val serverInfo = service.getAEMServers().find { it.name == serverName }
+            val serverInfo = service.getAEMServers().find { it.name == value }
             serverUrl = serverInfo?.url
             login = serverInfo?.login
             password = serverInfo?.password
         }
+
+    private var serverUrl: String? = null
+    private var login: String? = null
+    private var password: String? = null
 
     override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> {
         return AemGroovySettingsEditor(project)

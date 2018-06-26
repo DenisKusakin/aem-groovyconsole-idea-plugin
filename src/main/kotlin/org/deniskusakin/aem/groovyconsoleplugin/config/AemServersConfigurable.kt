@@ -80,7 +80,7 @@ class AemServersConfigurable(val project: Project) : Configurable {
             val model = serversListComponent.model as CollectionListModel
             model.remove(selected)
             myAEMServersEditors.removeAt(selectedIndex)
-            if (model.size > 0) {
+            if (model.size > 0 && selectedIndex > 0) {
                 serversListComponent.setSelectedValue(model.getElementAt(selectedIndex - 1), true)
             }
         }
