@@ -13,20 +13,16 @@ class AemGroovyRunConfigurationProducer private constructor() : RunConfiguration
         val service = ServiceManager.getService(context.project, PersistentStateService::class.java)
         val firstServerFromGlobalConfig = service.getAEMServers().firstOrNull()
 
-        if (context.location?.virtualFile?.path == configuration.scriptPath && configuration.serverName == firstServerFromGlobalConfig?.name) {
-            return true
-        }
-
-        return false
+        return context.location?.virtualFile?.path == configuration.scriptPath && configuration.serverName == firstServerFromGlobalConfig?.name
     }
 
     override fun setupConfigurationFromContext(configuration: AemGroovyRunConfiguration, context: ConfigurationContext, sourceElement: Ref<PsiElement>?): Boolean {
         val service = ServiceManager.getService(context.project, PersistentStateService::class.java)
         val firstServerFromGlobalConfig = service.getAEMServers().firstOrNull()
-        if (context.location?.virtualFile?.extension == "groovy" && firstServerFromGlobalConfig != null) {
+        if (true && firstServerFromGlobalConfig != null) {
             configuration.scriptPath = context.location?.virtualFile?.path
             configuration.serverName = configuration.serverName ?: firstServerFromGlobalConfig.name
-            configuration.name = "${firstServerFromGlobalConfig.name}:${context.location?.virtualFile?.name}"
+            configuration.name = "${firstServerFromGlobalConfig.name}:${context.location?.virtualFile?.path}"
 
             return true
         }
