@@ -9,6 +9,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotifications
 import org.deniskusakin.aem.groovyconsoleplugin.actions.AemGrExecuteAction
+import org.deniskusakin.aem.groovyconsoleplugin.actions.AemGrSelectServerAction
 import javax.swing.JComponent
 
 class EditorDecorator(private val project: Project) : EditorNotifications.Provider<JComponent>() {
@@ -19,8 +20,9 @@ class EditorDecorator(private val project: Project) : EditorNotifications.Provid
     override fun getKey(): Key<JComponent> = myKey
 
     override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor): JComponent? {
-        val actionGroup = DefaultActionGroup(AemGrExecuteAction())
+        val actionGroup = DefaultActionGroup(AemGrExecuteAction(), AemGrSelectServerAction())
         val menu = ActionManager.getInstance().createActionToolbar("AemGroovyConsole", actionGroup, true)
+
         return EditorHeaderComponent().apply {
             add(menu.component)
         }
