@@ -44,6 +44,7 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
     companion object {
         private val GROOVY_CONSOLE = Key.create<AEMGroovyConsole>("AEMGroovyConsoleKey")
         val GROOVY_CONSOLE_CURRENT_SERVER = Key.create<String>("AEMGroovyConsoleCurrentServer")
+        private const val NETWORK_TIMEOUT = 10 * 60 * 1000
 
         fun getOrCreateConsole(project: Project,
                                contentFile: VirtualFile) {
@@ -94,11 +95,14 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
         view.print("Running script on $serverName\n\n", ConsoleViewContentType.LOG_WARNING_OUTPUT)
 
         Fuel.post("$serverHost/bin/groovyconsole/post.json", listOf(Pair("script", scriptContent)))
+                .timeout(NETWORK_TIMEOUT)
+                .timeoutRead(NETWORK_TIMEOUT)
                 .authenticate(login, password)
                 .response { request, response, result ->
                     when (result) {
                         is Result.Failure -> {
-
+                            view.print("ERROR: \n", ConsoleViewContentType.ERROR_OUTPUT)
+                            view.print(result.getException().localizedMessage, ConsoleViewContentType.ERROR_OUTPUT)
                         }
                         is Result.Success -> {
                             val output = Gson().fromJson<GroovyConsoleOutput>(String(response.data), GroovyConsoleOutput::class.java)
