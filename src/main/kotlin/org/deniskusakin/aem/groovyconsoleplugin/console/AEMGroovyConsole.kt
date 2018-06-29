@@ -23,12 +23,14 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.Consumer
+import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 import java.awt.BorderLayout
 import java.io.IOException
 import java.nio.charset.Charset
@@ -37,53 +39,41 @@ import javax.swing.JPanel
 /**
  * @author Denis_Kusakin. 6/26/2018.
  */
-class AEMGroovyConsole(private val project: Project, private val descriptor: RunContentDescriptor, private val view: ConsoleView) {
+class AEMGroovyConsole(private val project: Project, private val descriptor: RunContentDescriptor, private val view: ConsoleView, private val serverName: String) {
 
     companion object {
-        val GROOVY_CONSOLE = Key.create<AEMGroovyConsole>("AEMGroovyConsoleKey")
+        private val GROOVY_CONSOLE = Key.create<AEMGroovyConsole>("AEMGroovyConsoleKey")
+        val GROOVY_CONSOLE_CURRENT_SERVER = Key.create<String>("AEMGroovyConsoleCurrentServer")
+
         fun getOrCreateConsole(project: Project,
                                contentFile: VirtualFile) {
+            val currentServer = contentFile.getUserData(GROOVY_CONSOLE_CURRENT_SERVER) ?: ""
+
 //            val existingConsole = contentFile.getUserData<AEMGroovyConsole>(GROOVY_CONSOLE)
 //            if (existingConsole != null) {
 //                existingConsole.execute(String(contentFile.contentsToByteArray()))
 //                return
 //            }
-            val console = createConsole(project, contentFile)
+            val console = createConsole(project, contentFile, currentServer)
+            //TODO: Move this from get method
             console!!.execute(String(contentFile.contentsToByteArray()))
-//        val initializer = { module ->
-//            val console = createConsole(project, contentFile, module)
-//            if (console != null) {
-//                callback.consume(console)
-//            }
-//        }
-//
-//        val module = GroovyConsoleStateService.getInstance(project).getSelectedModule(contentFile)
-//        if (module == null || module!!.isDisposed()) {
-//            // if not, then select module, then run initializer
-//            GroovyConsoleUtil.selectModuleAndRun(project, initializer)
-//        } else {
-//            // if module for console is already selected, then use it for creation
-//            initializer.consume(module)
-//        }
         }
 
         private val defaultExecutor = DefaultRunExecutor.getRunExecutorInstance()
         private val UTF_8 = Charset.forName("UTF-8")
         private val LOGGER = Logger.getInstance(AEMGroovyConsole::class.java)
 
-        fun createConsole(project: Project,
-                          contentFile: VirtualFile): AEMGroovyConsole? {
-            val title = "ServerName:${contentFile.name}"
+        private fun createConsole(project: Project,
+                                  contentFile: VirtualFile, serverName: String): AEMGroovyConsole? {
+            val title = "$serverName:${contentFile.name}"
             val consoleView = ConsoleViewImpl(project, true)
             val descriptor = RunContentDescriptor(consoleView, null, JPanel(BorderLayout()), title)
-            val console = AEMGroovyConsole(project, descriptor, consoleView)
+            val console = AEMGroovyConsole(project, descriptor, consoleView, serverName)
 
             val consoleViewComponent = consoleView.component
 
             val ui = descriptor.component
             ui.add(consoleViewComponent, BorderLayout.CENTER)
-            //consoleView.print("!!!!!!!!!!!!!!!!!!!!!!!!!", ConsoleViewContentType.LOG_WARNING_OUTPUT)
-
             contentFile.putUserData<AEMGroovyConsole>(GROOVY_CONSOLE, console)
             ExecutionManager.getInstance(project).contentManager.showRunContent(defaultExecutor, descriptor)
             return console
@@ -91,38 +81,37 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
 
     }
 
-    private fun doExecute(command: String) {
-        for (line in command.trim { it <= ' ' }.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
-            view.print("> ", ConsoleViewContentType.USER_INPUT)
-            view.print(line, ConsoleViewContentType.USER_INPUT)
-            view.print("\n", ConsoleViewContentType.NORMAL_OUTPUT)
-        }
-//        ApplicationManager.getApplication().executeOnPooledThread { send( StringUtil.replace(command, "\n", "###\\n")) }
-    }
-
     fun execute(scriptContent: String) {
-//        if (!StringUtil.isEmptyOrSpaces(command)) doExecute(command)
-        ExecutionManager.getInstance(project).contentManager.toFrontRunContent(defaultExecutor, descriptor)
-        val login = "admin"
-        val password = "admin"
-        val serverHost = "http://localhost:4503"
-        Fuel.post("$serverHost/bin/groovyconsole/post.json", listOf(Pair("script", scriptContent))).authenticate(login, password).response { request, response, result ->
-            when (result) {
-                is Result.Failure -> {
+        val service = ServiceManager.getService(project, PersistentStateService::class.java)
+        val currentServerInfo = service.getAEMServers().find { it.name == serverName }
 
-                }
-                is Result.Success -> {
-                    val output = Gson().fromJson<GroovyConsoleOutput>(String(response.data), GroovyConsoleOutput::class.java)
-                    view.print("Execution Time:${output.runningTime}", ConsoleViewContentType.LOG_WARNING_OUTPUT)
-                    view.print("\n\n", ConsoleViewContentType.NORMAL_OUTPUT)
-                    if (output.exceptionStackTrace.isBlank()) {
-                        view.print(output.output, ConsoleViewContentType.NORMAL_OUTPUT)
-                    } else {
-                        view.print(output.exceptionStackTrace, ConsoleViewContentType.ERROR_OUTPUT)
+        val login = currentServerInfo!!.login
+        val password = currentServerInfo.password
+        val serverHost = currentServerInfo.url
+
+        ExecutionManager.getInstance(project).contentManager.toFrontRunContent(defaultExecutor, descriptor)
+
+        view.print("Running script on $serverName\n\n", ConsoleViewContentType.LOG_WARNING_OUTPUT)
+
+        Fuel.post("$serverHost/bin/groovyconsole/post.json", listOf(Pair("script", scriptContent)))
+                .authenticate(login, password)
+                .response { request, response, result ->
+                    when (result) {
+                        is Result.Failure -> {
+
+                        }
+                        is Result.Success -> {
+                            val output = Gson().fromJson<GroovyConsoleOutput>(String(response.data), GroovyConsoleOutput::class.java)
+                            view.print("Execution Time:${output.runningTime}", ConsoleViewContentType.LOG_WARNING_OUTPUT)
+                            view.print("\n\n", ConsoleViewContentType.NORMAL_OUTPUT)
+                            if (output.exceptionStackTrace.isBlank()) {
+                                view.print(output.output, ConsoleViewContentType.NORMAL_OUTPUT)
+                            } else {
+                                view.print(output.exceptionStackTrace, ConsoleViewContentType.ERROR_OUTPUT)
+                            }
+                        }
                     }
                 }
-            }
-        }
     }
 
     data class GroovyConsoleOutput(val output: String, val runningTime: String, val exceptionStackTrace: String)
