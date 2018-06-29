@@ -3,15 +3,15 @@ package org.deniskusakin.aem.groovyconsoleplugin.run.configuration
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.ConfigurationType
 import com.intellij.openapi.util.IconLoader
+import org.deniskusakin.aem.groovyconsoleplugin.actions.Icons
 import javax.swing.Icon
 
 /**
  * @author Denis_Kusakin. 6/19/2018.
  */
 class AemGroovyConfigurationType : ConfigurationType {
-    private val icon = IconLoader.getIcon("/icons/groovy_16x16.png")
     override fun getIcon(): Icon {
-        return icon
+        return Icons.GROOVY_ICON
     }
 
     override fun getConfigurationTypeDescription(): String {
