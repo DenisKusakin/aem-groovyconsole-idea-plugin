@@ -106,13 +106,12 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
                         }
                         is Result.Success -> {
                             val output = Gson().fromJson<GroovyConsoleOutput>(String(response.data), GroovyConsoleOutput::class.java)
-                            view.print("Execution Time:${output.runningTime}", ConsoleViewContentType.LOG_WARNING_OUTPUT)
-                            view.print("\n\n", ConsoleViewContentType.NORMAL_OUTPUT)
                             if (output.exceptionStackTrace.isBlank()) {
                                 view.print(output.output, ConsoleViewContentType.NORMAL_OUTPUT)
                             } else {
                                 view.print(output.exceptionStackTrace, ConsoleViewContentType.ERROR_OUTPUT)
                             }
+                            view.print("Execution Time:${output.runningTime}", ConsoleViewContentType.LOG_WARNING_OUTPUT)
                         }
                     }
                 }

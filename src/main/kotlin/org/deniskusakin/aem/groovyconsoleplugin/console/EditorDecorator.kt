@@ -22,6 +22,7 @@ class EditorDecorator(private val project: Project) : EditorNotifications.Provid
     override fun getKey(): Key<JComponent> = myKey
 
     override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor): JComponent? {
+        if (file.extension != "groovy") return null
         val service = ServiceManager.getService(project, PersistentStateService::class.java)
         val currentServerName = file.getUserData(AEMGroovyConsole.GROOVY_CONSOLE_CURRENT_SERVER)
                 ?: service.getAEMServers().map { it.name }.firstOrNull().orEmpty()
