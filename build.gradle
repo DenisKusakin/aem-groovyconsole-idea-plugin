@@ -14,7 +14,7 @@ plugins {
 }
 
 group 'org.deniskusakin.aem'
-version '1.0-SNAPSHOT'
+version '0.0.1-alpha'
 
 apply plugin: 'kotlin'
 
@@ -42,4 +42,8 @@ patchPluginXml {
     changeNotes """
       Add change notes here.<br>
       <em>most HTML tags may be used</em>"""
+}
+publishPlugin {
+    username intellijPublishUsername
+    password intellijPublishPassword
 }
