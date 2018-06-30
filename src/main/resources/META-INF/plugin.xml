@@ -4,8 +4,7 @@
     <vendor url="https://github.com/DenisKusakin/aem-groovyconsole-idea-plugin">Denis Kusakin</vendor>
 
     <description><![CDATA[
-    Simple plugin to execute groovy scripts on running AEM server. Plugin is based on AEM Groovy Console<br>
-    <em>most HTML tags may be used</em>
+    Simple plugin to execute groovy scripts on running AEM server. Plugin is based on AEM Groovy Console
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
