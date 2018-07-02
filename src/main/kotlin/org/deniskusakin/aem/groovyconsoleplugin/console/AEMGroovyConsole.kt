@@ -5,10 +5,15 @@ import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.intellij.execution.ExecutionManager
 import com.intellij.execution.executors.DefaultRunExecutor
+import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.ui.RunContentDescriptor
+import com.intellij.execution.ui.actions.CloseAction
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -47,20 +52,37 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
         }
 
         private val defaultExecutor = DefaultRunExecutor.getRunExecutorInstance()
-        private val UTF_8 = Charset.forName("UTF-8")
-        private val LOGGER = Logger.getInstance(AEMGroovyConsole::class.java)
 
         private fun createConsole(project: Project,
                                   contentFile: VirtualFile, serverName: String): AEMGroovyConsole? {
             val title = "$serverName:${contentFile.name}"
-            val consoleView = ConsoleViewImpl(project, true)
-            val descriptor = RunContentDescriptor(consoleView, null, JPanel(BorderLayout()), title)
+            val consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).console//ConsoleViewImpl(project, true)
+            val descriptor = object : RunContentDescriptor(consoleView, null, JPanel(BorderLayout()), title) {
+                //TODO: Why does this change resolved the problem? How it work in default Groovy Console?
+                override fun isContentReuseProhibited(): Boolean {
+                    return true
+                }
+            }
             val console = AEMGroovyConsole(project, descriptor, consoleView, serverName)
             descriptor.executionId = title.hashCode().toLong()
             val consoleViewComponent = consoleView.component
 
+            val actionGroup = DefaultActionGroup()
+//            actionGroup.add(BuildAndRestartConsoleAction(module, project, defaultExecutor, descriptor, restarter(project, contentFile)))
+            actionGroup.addSeparator()
+            actionGroup.addAll(*consoleView.createConsoleActions())
+            actionGroup.add(object : CloseAction(defaultExecutor, descriptor, project) {
+                override fun actionPerformed(e: AnActionEvent?) {
+//                    contentFile.putUserData(GROOVY_CONSOLE, null)
+                    super.actionPerformed(e)
+                }
+            })
+            val toolbar = ActionManager.getInstance().createActionToolbar("AEMGroovyConsole", actionGroup, false)
+            toolbar.setTargetComponent(consoleViewComponent)
+
             val ui = descriptor.component
             ui.add(consoleViewComponent, BorderLayout.CENTER)
+            ui.add(toolbar.component, BorderLayout.WEST)
             //contentFile.putUserData<AEMGroovyConsole>(GROOVY_CONSOLE, console)
             ExecutionManager.getInstance(project).contentManager.showRunContent(defaultExecutor, descriptor)
             return console
@@ -84,14 +106,13 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
     fun execute(scriptContent: String) {
         val service = ServiceManager.getService(project, PersistentStateService::class.java)
         val currentServerInfo = service.getAEMServers().find { it.name == serverName }
-
         val login = currentServerInfo!!.login
         val password = currentServerInfo.password
         val serverHost = currentServerInfo.url
 
-        ExecutionManager.getInstance(project).contentManager.toFrontRunContent(defaultExecutor, descriptor)
-
+        view.clear()
         view.print("\nRunning script on $serverName\n\n", ConsoleViewContentType.LOG_WARNING_OUTPUT)
+        ExecutionManager.getInstance(project).contentManager.toFrontRunContent(defaultExecutor, descriptor)
 
         Fuel.post("$serverHost/bin/groovyconsole/post.json", listOf(Pair("script", scriptContent)))
                 .timeout(NETWORK_TIMEOUT)
