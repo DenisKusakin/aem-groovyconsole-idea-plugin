@@ -25,22 +25,25 @@ import javax.swing.JPanel
 class AEMGroovyConsole(private val project: Project, private val descriptor: RunContentDescriptor, private val view: ConsoleView, private val serverName: String) {
 
     companion object {
-        private val GROOVY_CONSOLE = Key.create<AEMGroovyConsole>("AEMGroovyConsoleKey")
+        private val GROOVY_CONSOLE = Key.create<AEMGroovyConsoles>("AEMGroovyConsoleKey")
         val GROOVY_CONSOLE_CURRENT_SERVER = Key.create<String>("AEMGroovyConsoleCurrentServer")
         private const val NETWORK_TIMEOUT = 10 * 60 * 1000
 
         fun getOrCreateConsole(project: Project,
-                               contentFile: VirtualFile) {
+                               contentFile: VirtualFile): AEMGroovyConsole {
             val currentServer = contentFile.getUserData(GROOVY_CONSOLE_CURRENT_SERVER) ?: ""
-
+            val existingConsole = contentFile.getConsole(serverName = currentServer)
+            if (existingConsole != null) {
+                return existingConsole
+            }
 //            val existingConsole = contentFile.getUserData<AEMGroovyConsole>(GROOVY_CONSOLE)
 //            if (existingConsole != null) {
 //                existingConsole.execute(String(contentFile.contentsToByteArray()))
 //                return
 //            }
             val console = createConsole(project, contentFile, currentServer)
-            //TODO: Move this from get method
-            console!!.execute(String(contentFile.contentsToByteArray()))
+            contentFile.addConsole(serverName = currentServer, console = console!!)
+            return console
         }
 
         private val defaultExecutor = DefaultRunExecutor.getRunExecutorInstance()
@@ -53,14 +56,27 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
             val consoleView = ConsoleViewImpl(project, true)
             val descriptor = RunContentDescriptor(consoleView, null, JPanel(BorderLayout()), title)
             val console = AEMGroovyConsole(project, descriptor, consoleView, serverName)
-
+            descriptor.executionId = title.hashCode().toLong()
             val consoleViewComponent = consoleView.component
 
             val ui = descriptor.component
             ui.add(consoleViewComponent, BorderLayout.CENTER)
-            contentFile.putUserData<AEMGroovyConsole>(GROOVY_CONSOLE, console)
+            //contentFile.putUserData<AEMGroovyConsole>(GROOVY_CONSOLE, console)
             ExecutionManager.getInstance(project).contentManager.showRunContent(defaultExecutor, descriptor)
             return console
+        }
+
+        private fun VirtualFile.getConsole(serverName: String): AEMGroovyConsole? {
+            return getUserData(GROOVY_CONSOLE)?.get(serverName)
+        }
+
+        private fun VirtualFile.addConsole(serverName: String, console: AEMGroovyConsole) {
+            val consoles = this.getUserData(GROOVY_CONSOLE)
+            if (consoles == null) {
+                this.putUserData(GROOVY_CONSOLE, AEMGroovyConsoles(serverName, console))
+            } else {
+                consoles.put(serverName, console)
+            }
         }
 
     }
@@ -75,7 +91,7 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
 
         ExecutionManager.getInstance(project).contentManager.toFrontRunContent(defaultExecutor, descriptor)
 
-        view.print("Running script on $serverName\n\n", ConsoleViewContentType.LOG_WARNING_OUTPUT)
+        view.print("\nRunning script on $serverName\n\n", ConsoleViewContentType.LOG_WARNING_OUTPUT)
 
         Fuel.post("$serverHost/bin/groovyconsole/post.json", listOf(Pair("script", scriptContent)))
                 .timeout(NETWORK_TIMEOUT)
@@ -101,4 +117,16 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
     }
 
     data class GroovyConsoleOutput(val output: String, val runningTime: String, val exceptionStackTrace: String)
+}
+
+class AEMGroovyConsoles(serverName: String, console: AEMGroovyConsole) {
+    private val map = mutableMapOf(Pair(serverName, console))
+
+    fun put(serverName: String, console: AEMGroovyConsole) {
+        map += Pair(serverName, console)
+    }
+
+    fun get(serverName: String): AEMGroovyConsole? {
+        return map.getOrDefault(serverName, null)
+    }
 }

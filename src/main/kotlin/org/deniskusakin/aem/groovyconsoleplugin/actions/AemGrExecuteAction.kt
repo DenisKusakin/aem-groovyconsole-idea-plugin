@@ -16,6 +16,7 @@ class AemGrExecuteAction : AnAction(AllIcons.Toolwindows.ToolWindowRun) {
         val virtualFile = CommonDataKeys.VIRTUAL_FILE.getData(e.dataContext)
         if (project == null || editor == null || virtualFile == null) return
 
-        AEMGroovyConsole.getOrCreateConsole(project, virtualFile)
+        val console = AEMGroovyConsole.getOrCreateConsole(project, virtualFile)
+        console.execute(String(virtualFile.contentsToByteArray()))
     }
 }
