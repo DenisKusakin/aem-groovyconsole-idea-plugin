@@ -10,7 +10,10 @@ import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.execution.ui.actions.CloseAction
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
@@ -59,7 +62,13 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
             val consoleViewComponent = consoleView.component
 
             val actionGroup = DefaultActionGroup()
-//            actionGroup.add(BuildAndRestartConsoleAction(module, project, defaultExecutor, descriptor, restarter(project, contentFile)))
+            val restartAction = object : AnAction("Restart the script", "Run the script again", AllIcons.Actions.Restart) {
+                override fun actionPerformed(e: AnActionEvent?) {
+                    console.execute(String(contentFile.contentsToByteArray()))
+                }
+
+            }
+            actionGroup.add(restartAction)
             actionGroup.addSeparator()
             actionGroup.addAll(*consoleView.createConsoleActions())
             actionGroup.add(CloseAction(defaultExecutor, descriptor, project))
