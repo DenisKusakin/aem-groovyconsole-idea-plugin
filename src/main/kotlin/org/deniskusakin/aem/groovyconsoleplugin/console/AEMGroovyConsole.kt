@@ -109,7 +109,6 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
         val login = currentServerInfo!!.login
         val password = currentServerInfo.password
         val serverHost = currentServerInfo.url
-
         view.clear()
         view.print("\nRunning script on $serverName\n\n", ConsoleViewContentType.LOG_WARNING_OUTPUT)
         ExecutionManager.getInstance(project).contentManager.toFrontRunContent(defaultExecutor, descriptor)
