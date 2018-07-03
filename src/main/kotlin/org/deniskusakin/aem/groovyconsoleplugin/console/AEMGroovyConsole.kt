@@ -6,28 +6,24 @@ import com.google.gson.Gson
 import com.intellij.execution.ExecutionManager
 import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.execution.filters.TextConsoleBuilderFactory
-import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.execution.ui.actions.CloseAction
 import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.components.ServiceManager
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 import java.awt.BorderLayout
-import java.nio.charset.Charset
 import javax.swing.JPanel
 
 /**
  * @author Denis_Kusakin. 6/26/2018.
  */
-class AEMGroovyConsole(private val project: Project, private val descriptor: RunContentDescriptor, private val view: ConsoleView, private val serverName: String) {
+class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescriptor, private val view: ConsoleView, private val serverName: String) {
 
     companion object {
         private val GROOVY_CONSOLE = Key.create<AEMGroovyConsoles>("AEMGroovyConsoleKey")
@@ -41,11 +37,6 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
             if (existingConsole != null) {
                 return existingConsole
             }
-//            val existingConsole = contentFile.getUserData<AEMGroovyConsole>(GROOVY_CONSOLE)
-//            if (existingConsole != null) {
-//                existingConsole.execute(String(contentFile.contentsToByteArray()))
-//                return
-//            }
             val console = createConsole(project, contentFile, currentServer)
             contentFile.addConsole(serverName = currentServer, console = console!!)
             return console
@@ -56,9 +47,9 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
         private fun createConsole(project: Project,
                                   contentFile: VirtualFile, serverName: String): AEMGroovyConsole? {
             val title = "$serverName:${contentFile.name}"
-            val consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).console//ConsoleViewImpl(project, true)
+            val consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).console
             val descriptor = object : RunContentDescriptor(consoleView, null, JPanel(BorderLayout()), title) {
-                //TODO: Why does this change resolved the problem? How it work in default Groovy Console?
+                //TODO: Why does this change resolved the problem? How does it work in default Groovy Console?
                 override fun isContentReuseProhibited(): Boolean {
                     return true
                 }
@@ -71,25 +62,25 @@ class AEMGroovyConsole(private val project: Project, private val descriptor: Run
 //            actionGroup.add(BuildAndRestartConsoleAction(module, project, defaultExecutor, descriptor, restarter(project, contentFile)))
             actionGroup.addSeparator()
             actionGroup.addAll(*consoleView.createConsoleActions())
-            actionGroup.add(object : CloseAction(defaultExecutor, descriptor, project) {
-                override fun actionPerformed(e: AnActionEvent?) {
-//                    contentFile.putUserData(GROOVY_CONSOLE, null)
-                    super.actionPerformed(e)
-                }
-            })
+            actionGroup.add(CloseAction(defaultExecutor, descriptor, project))
             val toolbar = ActionManager.getInstance().createActionToolbar("AEMGroovyConsole", actionGroup, false)
             toolbar.setTargetComponent(consoleViewComponent)
 
             val ui = descriptor.component
             ui.add(consoleViewComponent, BorderLayout.CENTER)
             ui.add(toolbar.component, BorderLayout.WEST)
-            //contentFile.putUserData<AEMGroovyConsole>(GROOVY_CONSOLE, console)
             ExecutionManager.getInstance(project).contentManager.showRunContent(defaultExecutor, descriptor)
             return console
         }
 
         private fun VirtualFile.getConsole(serverName: String): AEMGroovyConsole? {
-            return getUserData(GROOVY_CONSOLE)?.get(serverName)
+            val console = getUserData(GROOVY_CONSOLE)?.get(serverName) ?: return null
+            if (ExecutionManager.getInstance(console.project).contentManager.allDescriptors.contains(console.descriptor)) {
+                return console
+            }
+            //TODO: In default Groovy COnsole implementation this somehow works without such hack
+            getUserData(GROOVY_CONSOLE)!!.cleanUpServer(serverName)
+            return null
         }
 
         private fun VirtualFile.addConsole(serverName: String, console: AEMGroovyConsole) {
@@ -149,5 +140,9 @@ class AEMGroovyConsoles(serverName: String, console: AEMGroovyConsole) {
 
     fun get(serverName: String): AEMGroovyConsole? {
         return map.getOrDefault(serverName, null)
+    }
+
+    fun cleanUpServer(serverName: String) {
+        map.remove(serverName)
     }
 }
