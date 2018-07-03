@@ -44,7 +44,7 @@ patchPluginXml {
       Use it only to get familiar with the plugin
       """
 }
-publishPlugin {
-    username intellijPublishUsername
-    password intellijPublishPassword
-}
+//publishPlugin {
+//    username intellijPublishUsername
+//    password intellijPublishPassword
+//}

@@ -1,6 +1,7 @@
 package org.deniskusakin.aem.groovyconsoleplugin.console
 
 import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.CommonShortcuts
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.editor.impl.EditorHeaderComponent
@@ -27,8 +28,9 @@ class EditorDecorator(private val project: Project) : EditorNotifications.Provid
         val currentServerName = file.getUserData(AEMGroovyConsole.GROOVY_CONSOLE_CURRENT_SERVER)
                 ?: service.getAEMServers().map { it.name }.firstOrNull().orEmpty()
         file.putUserData(AEMGroovyConsole.GROOVY_CONSOLE_CURRENT_SERVER, currentServerName)
-
-        val actionGroup = DefaultActionGroup(AemGrExecuteAction(), AemGrSelectServerAction(project, file, currentServerName))
+        val execAction = AemGrExecuteAction()
+        execAction.registerCustomShortcutSet(CommonShortcuts.CTRL_ENTER, fileEditor.component)
+        val actionGroup = DefaultActionGroup(execAction, AemGrSelectServerAction(project, file, currentServerName))
         val menu = ActionManager.getInstance().createActionToolbar("AemGroovyConsole", actionGroup, true)
 
         return EditorHeaderComponent().apply {
