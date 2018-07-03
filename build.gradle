@@ -14,7 +14,7 @@ plugins {
 }
 
 group 'org.deniskusakin.aem'
-version '0.0.1-alpha'
+version '0.0.1-alpha.1'
 
 apply plugin: 'kotlin'
 
@@ -40,8 +40,9 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
-      Alpha release.<br>
-      Use it only to get familiar with the plugin"""
+      Alpha release. <br>
+      Use it only to get familiar with the plugin
+      """
 }
 publishPlugin {
     username intellijPublishUsername
