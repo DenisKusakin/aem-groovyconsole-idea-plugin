@@ -1,5 +1,9 @@
 package org.deniskusakin.aem.groovyconsoleplugin.console
 
+import com.intellij.codeInsight.hint.HintManager
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.CommonShortcuts
 import com.intellij.openapi.actionSystem.DefaultActionGroup
@@ -26,7 +30,12 @@ class EditorDecorator(private val project: Project) : EditorNotifications.Provid
         if (file.extension != "groovy" || !file.path.contains("groovyconsole")) return null
         val service = ServiceManager.getService(project, PersistentStateService::class.java)
         val currentServerName = file.getUserData(AEMGroovyConsole.GROOVY_CONSOLE_CURRENT_SERVER)
-                ?: service.getAEMServers().map { it.name }.firstOrNull().orEmpty()
+                ?: service.getAEMServers().map { it.name }.firstOrNull()
+        if (currentServerName == null) {
+            //HintManager.getInstance().showErrorHint(fileEditor, "")
+            Notifications.Bus.notify(Notification("AEM Servers Missing Configuration", "Missing AEM Servers Configuration", "Missing AEM Servers Configuration", NotificationType.WARNING))
+            return null
+        }
         file.putUserData(AEMGroovyConsole.GROOVY_CONSOLE_CURRENT_SERVER, currentServerName)
         val execAction = AemGrExecuteAction()
         execAction.registerCustomShortcutSet(CommonShortcuts.CTRL_ENTER, fileEditor.component)
