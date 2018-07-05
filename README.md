@@ -1,4 +1,4 @@
-# AEM Groovy Console IntelliJ Plugin (Active development, alpha release available)
+# AEM Groovy Console IntelliJ Plugin (Beta release available)
 The simple plugin for running groovy scripts using [AEM Groovy Console](https://github.com/OlsonDigital/aem-groovy-console) from IDE
 
 ## How to use
