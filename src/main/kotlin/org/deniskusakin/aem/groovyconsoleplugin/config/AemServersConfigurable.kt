@@ -37,8 +37,12 @@ class AemServersConfigurable(val project: Project) : Configurable {
             serversListComponent.model = CollectionListModel(emptyList())
             serversListComponent.selectionModel.addListSelectionListener {
                 val selected = serversListComponent.selectedValue
+                //TODO: How to avoid show/hide?
                 if (selected != null) {
+                    myServerEditor.isVisible = true
                     (myServerEditor.layout as CardLayout).show(myServerEditor, selected.oldName)
+                } else {
+                    myServerEditor.isVisible = false
                 }
             }
             val toolbarDecorator = ToolbarDecorator.createDecorator(serversListComponent).disableUpDownActions()
@@ -82,6 +86,8 @@ class AemServersConfigurable(val project: Project) : Configurable {
             myAEMServersEditors.removeAt(selectedIndex)
             if (model.size > 0 && selectedIndex > 0) {
                 serversListComponent.setSelectedValue(model.getElementAt(selectedIndex - 1), true)
+            } else if (model.size == 0) {
+                serversListComponent.setSelectedValue(null, false)
             }
         }
     }
