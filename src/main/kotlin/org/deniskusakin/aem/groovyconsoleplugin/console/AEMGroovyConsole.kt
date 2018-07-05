@@ -5,6 +5,9 @@ import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.intellij.execution.ExecutionManager
 import com.intellij.execution.executors.DefaultRunExecutor
+import com.intellij.execution.filters.RegexpFilter
+import com.intellij.execution.filters.RegexpFilter.FILE_PATH_MACROS
+import com.intellij.execution.filters.RegexpFilter.LINE_MACROS
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
@@ -26,7 +29,7 @@ import javax.swing.JPanel
 /**
  * @author Denis_Kusakin. 6/26/2018.
  */
-class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescriptor, private val view: ConsoleView, private val serverName: String) {
+class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescriptor, private val view: ConsoleView, private val serverName: String, private val filePath: String) {
 
     companion object {
         private val GROOVY_CONSOLE = Key.create<AEMGroovyConsoles>("AEMGroovyConsoleKey")
@@ -57,7 +60,11 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
                     return true
                 }
             }
-            val console = AEMGroovyConsole(project, descriptor, consoleView, serverName)
+
+            //This filter relies on replacement which is made in case of exception
+            consoleView.addMessageFilter(RegexpFilter(project, "at Script1.run($FILE_PATH_MACROS:$LINE_MACROS).*"))
+
+            val console = AEMGroovyConsole(project, descriptor, consoleView, serverName, contentFile.presentableUrl)
             descriptor.executionId = title.hashCode().toLong()
             val consoleViewComponent = consoleView.component
 
@@ -87,7 +94,7 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
             if (ExecutionManager.getInstance(console.project).contentManager.allDescriptors.contains(console.descriptor)) {
                 return console
             }
-            //TODO: In default Groovy COnsole implementation this somehow works without such hack
+            //TODO: In default Groovy Console implementation this somehow works without such hack
             getUserData(GROOVY_CONSOLE)!!.cleanUpServer(serverName)
             return null
         }
@@ -128,7 +135,11 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
                             if (output.exceptionStackTrace.isBlank()) {
                                 view.print(output.output, ConsoleViewContentType.NORMAL_OUTPUT)
                             } else {
-                                view.print(output.exceptionStackTrace, ConsoleViewContentType.ERROR_OUTPUT)
+                                //This looks a little bit weird, but it works
+                                view.scrollTo(0)
+                                //TODO: This code relies of fact that AEM Groovy Console uses Script1.groovy as file name, so this code is highly dangerous
+                                //In some obvious cases it could work incorrectly, but it provide user with better experience
+                                view.print(output.exceptionStackTrace.replace("Script1.groovy", filePath), ConsoleViewContentType.ERROR_OUTPUT)
                             }
                             view.print("Execution Time:${output.runningTime}", ConsoleViewContentType.LOG_WARNING_OUTPUT)
                         }
