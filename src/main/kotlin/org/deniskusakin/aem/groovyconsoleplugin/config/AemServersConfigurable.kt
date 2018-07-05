@@ -69,7 +69,7 @@ class AemServersConfigurable(val project: Project) : Configurable {
 
     private fun addNewServer() {
         val newServerName = getNewServerName()
-        val newAemServer = AemServerConfigUI(name = newServerName, url = "", login = "", password = "")
+        val newAemServer = AemServerConfigUI(name = newServerName, url = "http://example.com:4502", login = "", password = "")
         val (newServerEditor, editor) = getEditor(newAemServer)
         myAEMServersEditors += editor
         (serversListComponent.model as CollectionListModel).add(newAemServer)
