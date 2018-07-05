@@ -150,6 +150,7 @@ class AemServersConfigurable(val project: Project) : Configurable {
     override fun apply() {
         val service = ServiceManager.getService(project, PersistentStateService::class.java)
         service.setAEMServers(getDataFromEditors().map { it.toAemServerConfig() })
+        project.messageBus.syncPublisher(SettingsChangedNotifier.TOPIC).settingsChanged()
     }
 
     private fun resetData(aemServers: Collection<AemServerConfigUI>) {
