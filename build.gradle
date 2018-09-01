@@ -14,7 +14,7 @@ plugins {
 }
 
 group 'org.deniskusakin.aem'
-version '0.0.1-beta'
+version '0.1.0-beta'
 
 apply plugin: 'kotlin'
 
@@ -36,13 +36,11 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 intellij {
-    version '2018.1.5'
+    version '2018.2'
 }
 patchPluginXml {
     changeNotes """
-      Run script using Ctrl+Enter <br>
-      User is notified in case of missing configuration <br>
-      Console output improved in case of exception <br>
+      Fix compatibility issue. Plugin is now available for IDEA 2018.2 as well as for 2018.1.
       """
 }
 //publishPlugin {
