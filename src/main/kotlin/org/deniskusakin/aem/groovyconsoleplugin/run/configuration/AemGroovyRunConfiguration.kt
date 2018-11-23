@@ -16,7 +16,8 @@ import org.jdom.Element
 /**
  * @author Denis_Kusakin. 6/19/2018.
  */
-class AemGroovyRunConfiguration(project: Project, factory: ConfigurationFactory, name: String?) : LocatableConfigurationBase(project, factory, name) {
+@Deprecated("Run configuration is not used by plugin")
+class AemGroovyRunConfiguration(project: Project, factory: ConfigurationFactory, name: String?) : LocatableConfigurationBase<GrState>(project, factory, name) {
     var scriptPath: String? = null
     var serverName: String? = null
         set(value) {

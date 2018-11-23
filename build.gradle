@@ -14,7 +14,7 @@ plugins {
 }
 
 group 'org.deniskusakin.aem'
-version '0.1.0-beta'
+version '0.1.1-beta'
 
 apply plugin: 'kotlin'
 
@@ -36,11 +36,11 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 intellij {
-    version '2018.2'
+    version '2018.3'
 }
 patchPluginXml {
     changeNotes """
-      Fix compatibility issue. Plugin is now available for IDEA 2018.2 as well as for 2018.1.
+      Fix compatibility issue. Plugin is now available for IDEA 2018.3.
       """
 }
 //publishPlugin {

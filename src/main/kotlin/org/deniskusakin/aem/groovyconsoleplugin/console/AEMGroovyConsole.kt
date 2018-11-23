@@ -70,7 +70,7 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
 
             val actionGroup = DefaultActionGroup()
             val restartAction = object : AnAction("Restart the script", "Run the script again", AllIcons.Actions.Restart) {
-                override fun actionPerformed(e: AnActionEvent?) {
+                override fun actionPerformed(e: AnActionEvent) {
                     console.execute(String(contentFile.contentsToByteArray()))
                 }
 
