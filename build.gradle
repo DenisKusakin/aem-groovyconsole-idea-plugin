@@ -14,7 +14,7 @@ plugins {
 }
 
 group 'org.deniskusakin.aem'
-version '0.1.1-beta'
+version '0.2.0-beta'
 
 apply plugin: 'kotlin'
 
@@ -40,7 +40,7 @@ intellij {
 }
 patchPluginXml {
     changeNotes """
-      Fix compatibility issue. Plugin is now available for IDEA 2018.3.
+        Possibility to mark directory as AEM Groovy Scripts Root.
       """
 }
 //publishPlugin {
