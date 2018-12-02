@@ -24,6 +24,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 import java.awt.BorderLayout
+import javax.swing.JComponent
 import javax.swing.JPanel
 
 /**
@@ -54,7 +55,7 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
                                   contentFile: VirtualFile, serverName: String): AEMGroovyConsole? {
             val title = "$serverName:${contentFile.name}"
             val consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).console
-            val descriptor = object : RunContentDescriptor(consoleView, null, JPanel(BorderLayout()), title) {
+            val descriptor = object : RunContentDescriptor(consoleView, null, JPanel(BorderLayout()) as JComponent, title) {
                 //TODO: Why does this change resolved the problem? How does it work in default Groovy Console?
                 override fun isContentReuseProhibited(): Boolean {
                     return true

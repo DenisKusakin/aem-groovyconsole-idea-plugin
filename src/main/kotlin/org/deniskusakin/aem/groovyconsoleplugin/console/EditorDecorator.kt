@@ -16,6 +16,7 @@ import org.deniskusakin.aem.groovyconsoleplugin.actions.AemGrExecuteAction
 import org.deniskusakin.aem.groovyconsoleplugin.actions.AemGrSelectServerAction
 import org.deniskusakin.aem.groovyconsoleplugin.config.AemServersConfigurable
 import org.deniskusakin.aem.groovyconsoleplugin.config.SettingsChangedNotifier
+import org.deniskusakin.aem.groovyconsoleplugin.services.AemGroovyScriptsDetectionService
 import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 import javax.swing.JComponent
 
@@ -35,7 +36,9 @@ class EditorDecorator(private val project: Project, private val notifications: E
     override fun getKey(): Key<JComponent> = myKey
 
     override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor): JComponent? {
-        if (file.extension != "groovy" || !file.path.contains("groovyconsole")) return null
+        if (file.extension != "groovy" || !AemGroovyScriptsDetectionService.isAemGroovyFile(file.path, project))
+            return null
+
         val service = ServiceManager.getService(project, PersistentStateService::class.java)
         val serverFromFile = file.getUserData(AEMGroovyConsole.GROOVY_CONSOLE_CURRENT_SERVER)
         val availableServerNames = service.getAEMServers().map { it.name }
@@ -45,9 +48,9 @@ class EditorDecorator(private val project: Project, private val notifications: E
         if (currentServerName == null) {
             val notificationPanel = EditorNotificationPanel()
             notificationPanel.setText("AEM Servers configuration is missing")
-            notificationPanel.createActionLabel("Configure", {
+            notificationPanel.createActionLabel("Configure") {
                 ShowSettingsUtil.getInstance().showSettingsDialog(project, AemServersConfigurable::class.java)
-            })
+            }
             return notificationPanel
         }
         val execAction = AemGrExecuteAction()

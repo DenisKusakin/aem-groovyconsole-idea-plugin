@@ -28,8 +28,20 @@
                              instance="org.deniskusakin.aem.groovyconsoleplugin.config.AemServersConfigurable"/>
         <projectService
                 serviceImplementation="org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService"/>
+        <projectService
+                serviceImplementation="org.deniskusakin.aem.groovyconsoleplugin.services.RootFoldersService"/>
         <editorNotificationProvider implementation="org.deniskusakin.aem.groovyconsoleplugin.console.EditorDecorator"/>
         <!-- Add your extensions here -->
     </extensions>
+
+    <actions>
+        <action
+                id="MarkAsGroovyScriptsRoot"
+                text="AEM Groovy Scripts Root"
+                description="AEM Groovy Scripts Root"
+                class="org.deniskusakin.aem.groovyconsoleplugin.actions.MarkAsGroovyScriptsRootAction">
+            <add-to-group group-id="MarkRootGroup" anchor="last"/>
+        </action>
+    </actions>
 
 </idea-plugin>
