@@ -14,7 +14,7 @@ plugins {
 }
 
 group 'org.deniskusakin.aem'
-version '0.2.0-beta'
+version '0.2.1-beta'
 
 apply plugin: 'kotlin'
 
@@ -36,11 +36,11 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 intellij {
-    version '2018.3'
+    version '2019.1'
 }
 patchPluginXml {
     changeNotes """
-        Possibility to mark directory as AEM Groovy Scripts Root.
+        Fix compatibility issue. Plugin is now available for IDEA 2019.
       """
 }
 //publishPlugin {
