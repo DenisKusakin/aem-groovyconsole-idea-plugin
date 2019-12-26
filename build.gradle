@@ -14,7 +14,7 @@ plugins {
 }
 
 group 'org.deniskusakin.aem'
-version '0.2.2'
+version '0.2.3'
 
 apply plugin: 'kotlin'
 
@@ -36,11 +36,11 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 intellij {
-    version '2019.2'
+    version '2019.3.1'
 }
 patchPluginXml {
     changeNotes """
-        Fix compatibility issue. Plugin is now available for IDEA 2019.2.
+        Fix compatibility issue. Plugin is now available for IDEA 2019.3.1.
       """
 }
 //publishPlugin {
