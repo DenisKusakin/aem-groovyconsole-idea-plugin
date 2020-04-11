@@ -86,13 +86,13 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
             val ui = descriptor.component
             ui.add(consoleViewComponent, BorderLayout.CENTER)
             ui.add(toolbar.component, BorderLayout.WEST)
-            ExecutionManager.getInstance(project).contentManager.showRunContent(defaultExecutor, descriptor)
+            ExecutionManager.getInstance(project).getContentManager().showRunContent(defaultExecutor, descriptor)
             return console
         }
 
         private fun VirtualFile.getConsole(serverName: String): AEMGroovyConsole? {
             val console = getUserData(GROOVY_CONSOLE)?.get(serverName) ?: return null
-            if (ExecutionManager.getInstance(console.project).contentManager.allDescriptors.contains(console.descriptor)) {
+            if (ExecutionManager.getInstance(console.project).getContentManager().allDescriptors.contains(console.descriptor)) {
                 return console
             }
             //TODO: In default Groovy Console implementation this somehow works without such hack
@@ -119,7 +119,7 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
         val serverHost = currentServerInfo.url
         view.clear()
         view.print("\nRunning script on $serverName\n\n", ConsoleViewContentType.LOG_WARNING_OUTPUT)
-        ExecutionManager.getInstance(project).contentManager.toFrontRunContent(defaultExecutor, descriptor)
+        ExecutionManager.getInstance(project).getContentManager().toFrontRunContent(defaultExecutor, descriptor)
 
         Fuel.post("$serverHost/bin/groovyconsole/post.json", listOf(Pair("script", scriptContent)))
                 .timeout(NETWORK_TIMEOUT)
