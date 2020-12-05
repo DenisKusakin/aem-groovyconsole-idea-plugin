@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.41'
+    ext.kotlin_version = '1.4.20'
 
     repositories {
         mavenCentral()
@@ -14,7 +14,7 @@ plugins {
 }
 
 group 'org.deniskusakin.aem'
-version '0.2.5'
+version '0.2.6'
 
 apply plugin: 'kotlin'
 
@@ -36,14 +36,10 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 intellij {
-    version '2020.2'
+    version '2020.3'
 }
 patchPluginXml {
     changeNotes """
-        Fix compatibility issue. Plugin is now available for IDEA 2020.2.
+        Fix compatibility issue. Plugin is now available for IDEA 2020.3.
       """
 }
-//publishPlugin {
-//    username intellijPublishUsername
-//    password intellijPublishPassword
-//}

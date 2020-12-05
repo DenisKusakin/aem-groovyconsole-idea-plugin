@@ -19,6 +19,7 @@
     <depends>com.intellij.modules.lang</depends>
     -->
 <!--    <idea-version since-build="183" until-build="183.*"/>-->
+    <depends>com.intellij.modules.platform</depends>
     <extensions defaultExtensionNs="com.intellij">
         <configurationType
                 implementation="org.deniskusakin.aem.groovyconsoleplugin.run.configuration.AemGroovyConfigurationType"/>
