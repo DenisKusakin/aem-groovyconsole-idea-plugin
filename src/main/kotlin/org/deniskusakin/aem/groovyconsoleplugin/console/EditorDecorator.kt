@@ -20,12 +20,13 @@ import org.deniskusakin.aem.groovyconsoleplugin.services.AemGroovyScriptsDetecti
 import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 import javax.swing.JComponent
 
-class EditorDecorator(private val project: Project, private val notifications: EditorNotifications) : EditorNotifications.Provider<JComponent>() {
+class EditorDecorator(private val project: Project) : EditorNotifications.Provider<JComponent>() {
     companion object {
         private val myKey = Key.create<JComponent>("aem.groovy.console.toolbar")
     }
 
     init {
+        val notifications = project.getService(EditorNotifications::class.java)
         project.messageBus.connect(project).subscribe(SettingsChangedNotifier.TOPIC, object : SettingsChangedNotifier {
             override fun settingsChanged() {
                 notifications.updateAllNotifications()
@@ -42,7 +43,8 @@ class EditorDecorator(private val project: Project, private val notifications: E
         val service = ServiceManager.getService(project, PersistentStateService::class.java)
         val serverFromFile = file.getUserData(AEMGroovyConsole.GROOVY_CONSOLE_CURRENT_SERVER)
         val availableServerNames = service.getAEMServers().map { it.name }
-        val currentServerName = (if (serverFromFile == null || availableServerNames.contains(serverFromFile)) serverFromFile else null)
+        val currentServerName =
+            (if (serverFromFile == null || availableServerNames.contains(serverFromFile)) serverFromFile else null)
                 ?: availableServerNames.firstOrNull()
         file.putUserData(AEMGroovyConsole.GROOVY_CONSOLE_CURRENT_SERVER, currentServerName)
         if (currentServerName == null) {

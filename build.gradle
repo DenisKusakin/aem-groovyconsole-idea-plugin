@@ -36,10 +36,10 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 intellij {
-    version '2021.1'
+    version '2021.2'
 }
 patchPluginXml {
     changeNotes """
-        Fix compatibility issue. Plugin is now available for IDEA 2021.1.
+        Fix compatibility issue. Plugin is now available for IDEA 2021.2.
       """
 }
