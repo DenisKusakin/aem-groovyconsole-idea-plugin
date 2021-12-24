@@ -6,7 +6,6 @@ import com.intellij.execution.configurations.*
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.ExecutionEnvironment
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.JDOMExternalizer
@@ -22,7 +21,7 @@ class AemGroovyRunConfiguration(project: Project, factory: ConfigurationFactory,
     var serverName: String? = null
         set(value) {
             field = value
-            val service = ServiceManager.getService(project, PersistentStateService::class.java)
+            val service = project.getService(PersistentStateService::class.java)
             val serverInfo = service.getAEMServers().find { it.name == value }
             serverUrl = serverInfo?.url
             login = serverInfo?.login

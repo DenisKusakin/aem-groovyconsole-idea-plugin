@@ -2,7 +2,6 @@ package org.deniskusakin.aem.groovyconsoleplugin.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
@@ -18,7 +17,7 @@ import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 class AemGrSelectServerAction(private val project: Project, private val file: VirtualFile, private val serverName: String)
     : AnAction(serverName, "AEM Server", Icons.AEM_ICON) {
     override fun actionPerformed(e: AnActionEvent) {
-        val service = ServiceManager.getService(project, PersistentStateService::class.java)
+        val service = project.getService(PersistentStateService::class.java)
         val component = e.inputEvent?.component ?: return
         val step = object : BaseListPopupStep<String>("On which server the script should be applied?", service.getAEMServers().map { it.name }) {
             override fun onChosen(selectedValue: String?, finalChoice: Boolean): PopupStep<*>? {
@@ -26,7 +25,7 @@ class AemGrSelectServerAction(private val project: Project, private val file: Vi
                 return null
             }
         }
-        val popup = ListPopupImpl(step)
+        val popup = ListPopupImpl(project, step)
         popup.showUnderneathOf(component)
     }
 
