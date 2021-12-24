@@ -3,7 +3,6 @@ package org.deniskusakin.aem.groovyconsoleplugin.console
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.CommonShortcuts
 import com.intellij.openapi.actionSystem.DefaultActionGroup
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.editor.impl.EditorHeaderComponent
 import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.options.ShowSettingsUtil
@@ -40,7 +39,7 @@ class EditorDecorator(private val project: Project) : EditorNotifications.Provid
         if (file.extension != "groovy" || !AemGroovyScriptsDetectionService.isAemGroovyFile(file.path, project))
             return null
 
-        val service = ServiceManager.getService(project, PersistentStateService::class.java)
+        val service = project.getService(PersistentStateService::class.java)
         val serverFromFile = file.getUserData(AEMGroovyConsole.GROOVY_CONSOLE_CURRENT_SERVER)
         val availableServerNames = service.getAEMServers().map { it.name }
         val currentServerName =

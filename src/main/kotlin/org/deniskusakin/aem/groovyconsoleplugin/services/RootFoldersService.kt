@@ -38,7 +38,7 @@ class RootFoldersService : PersistentStateComponent<RootFoldersService.State> {
 
     companion object {
         fun getInstance(project: Project): RootFoldersService? {
-            return ServiceManager.getService(project, RootFoldersService::class.java)
+            return project.getService(RootFoldersService::class.java)
         }
     }
 }

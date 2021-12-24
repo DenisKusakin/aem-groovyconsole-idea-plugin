@@ -3,7 +3,6 @@ package org.deniskusakin.aem.groovyconsoleplugin.console
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
-import com.intellij.execution.ExecutionManager
 import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.execution.filters.RegexpFilter
 import com.intellij.execution.filters.RegexpFilter.FILE_PATH_MACROS
@@ -12,13 +11,13 @@ import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.ui.RunContentDescriptor
+import com.intellij.execution.ui.RunContentManager
 import com.intellij.execution.ui.actions.CloseAction
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
@@ -86,13 +85,13 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
             val ui = descriptor.component
             ui.add(consoleViewComponent, BorderLayout.CENTER)
             ui.add(toolbar.component, BorderLayout.WEST)
-            ExecutionManager.getInstance(project).getContentManager().showRunContent(defaultExecutor, descriptor)
+            RunContentManager.getInstance(project).showRunContent(defaultExecutor, descriptor)
             return console
         }
 
         private fun VirtualFile.getConsole(serverName: String): AEMGroovyConsole? {
             val console = getUserData(GROOVY_CONSOLE)?.get(serverName) ?: return null
-            if (ExecutionManager.getInstance(console.project).getContentManager().allDescriptors.contains(console.descriptor)) {
+            if (RunContentManager.getInstance(console.project).allDescriptors.contains(console.descriptor)) {
                 return console
             }
             //TODO: In default Groovy Console implementation this somehow works without such hack
@@ -112,14 +111,14 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
     }
 
     fun execute(scriptContent: String) {
-        val service = ServiceManager.getService(project, PersistentStateService::class.java)
+        val service = project.getService(PersistentStateService::class.java)
         val currentServerInfo = service.getAEMServers().find { it.name == serverName }
         val login = currentServerInfo!!.login
         val password = currentServerInfo.password
         val serverHost = currentServerInfo.url
         view.clear()
         view.print("\nRunning script on $serverName\n\n", ConsoleViewContentType.LOG_WARNING_OUTPUT)
-        ExecutionManager.getInstance(project).getContentManager().toFrontRunContent(defaultExecutor, descriptor)
+        RunContentManager.getInstance(project).toFrontRunContent(defaultExecutor, descriptor)
 
         Fuel.post("$serverHost/bin/groovyconsole/post.json", listOf(Pair("script", scriptContent)))
                 .timeout(NETWORK_TIMEOUT)

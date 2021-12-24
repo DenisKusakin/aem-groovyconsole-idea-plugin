@@ -122,16 +122,16 @@ class AemServersConfigurable(val project: Project) : Configurable {
         return Pair(panel, editor)
     }
 
-    override fun getDisplayName(): String? {
+    override fun getDisplayName(): String {
         return "AEM Servers"
     }
 
-    override fun createComponent(): JComponent? {
+    override fun createComponent(): JComponent {
         return component
     }
 
     override fun isModified(): Boolean {
-        val service = ServiceManager.getService(project, PersistentStateService::class.java)
+        val service = project.getService(PersistentStateService::class.java)
         val persistedData = service.getAEMServers()
         val actualData: List<AemServerConfigUI> = getDataFromEditors()
         val isModified = actualData != persistedData.map { it.toUIRepresentation() }
@@ -154,7 +154,7 @@ class AemServersConfigurable(val project: Project) : Configurable {
     }
 
     override fun apply() {
-        val service = ServiceManager.getService(project, PersistentStateService::class.java)
+        val service = project.getService(PersistentStateService::class.java)
         service.setAEMServers(getDataFromEditors().map { it.toAemServerConfig() })
         project.messageBus.syncPublisher(SettingsChangedNotifier.TOPIC).settingsChanged()
     }
@@ -187,7 +187,7 @@ class AemServersConfigurable(val project: Project) : Configurable {
     }
 
     override fun reset() {
-        val service = ServiceManager.getService(project, PersistentStateService::class.java)
+        val service = project.getService(PersistentStateService::class.java)
         resetData(service.getAEMServers().map { it.toUIRepresentation() })
     }
 

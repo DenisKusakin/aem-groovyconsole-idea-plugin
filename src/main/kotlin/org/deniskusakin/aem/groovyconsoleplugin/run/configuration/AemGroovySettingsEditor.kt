@@ -1,25 +1,23 @@
 package org.deniskusakin.aem.groovyconsoleplugin.run.configuration
 
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
-import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.layout.CCFlags
 import com.intellij.ui.layout.panel
 import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
-
-import javax.swing.*
+import javax.swing.JComponent
+import javax.swing.JPanel
 
 class AemGroovySettingsEditor(private val project: Project) : SettingsEditor<AemGroovyRunConfiguration>() {
     private var contentPane: JPanel
     private val scriptPath: TextFieldWithBrowseButton = TextFieldWithBrowseButton()
-    private val service = ServiceManager.getService(project, PersistentStateService::class.java)
+    private val service = project.getService(PersistentStateService::class.java)
     private val items = service.getAEMServers().map { it.name } + ""
-    private val aemServerComboBox = ComboBox<String>(items.toTypedArray())
+    private val aemServerComboBox = ComboBox(items.toTypedArray())
 
     init {
 //        aemServerComboBox.model = CollectionComboBoxModel(items)
