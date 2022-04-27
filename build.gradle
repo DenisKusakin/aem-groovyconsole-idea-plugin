@@ -14,7 +14,7 @@ plugins {
 }
 
 group 'org.deniskusakin.aem'
-version '0.2.9'
+version '0.2.10'
 
 apply plugin: 'kotlin'
 
@@ -39,8 +39,18 @@ intellij {
     version '2021.3'
 }
 patchPluginXml {
-    changeNotes """
-        Fix compatibility issue. Plugin is now available for IDEA 2021.2.
-        Fix compatibility issue. Plugin is now available for IDEA 2021.3.
+    untilBuild null
+    changeNotes """ 
+       <ul>
+            <li>
+                Fix compatibility issue. Plugin is now available for IDEA 2021.2.
+            </li>
+            <li>
+                Fix compatibility issue. Plugin is now available for IDEA 2021.3.
+            </li>
+            <li>
+                Fix compatibility issue. Plugin is now available for IDEA 2022.1.
+            </li>
+        </ul>
       """
 }
