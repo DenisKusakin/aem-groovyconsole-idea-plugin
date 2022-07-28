@@ -3,23 +3,8 @@
     <name>AEM Groovy Console</name>
     <vendor url="https://github.com/DenisKusakin/aem-groovyconsole-idea-plugin">Denis Kusakin</vendor>
 
-    <description><![CDATA[
-    Adds functionality for executing groovy scripts on running AEM server. Powered by AEM Groovy Console <br>
-    Features: <br>
-    <ul>
-        <li>Execute groovy scripts on running AEM server from editor</li>
-        <li>Script can be executed on multiple servers</li>
-        <li>Console output provides a link to the script's source code in case of exception</li>
-    </ul>
-    ]]></description>
-
-    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-         on how to target different products -->
-    <!-- uncomment to enable plugin in all products
-    <depends>com.intellij.modules.lang</depends>
-    -->
-<!--    <idea-version since-build="183" until-build="183.*"/>-->
     <depends>com.intellij.modules.platform</depends>
+
     <extensions defaultExtensionNs="com.intellij">
         <configurationType
                 implementation="org.deniskusakin.aem.groovyconsoleplugin.run.configuration.AemGroovyConfigurationType"/>
@@ -44,7 +29,4 @@
             <add-to-group group-id="MarkRootGroup" anchor="last"/>
         </action>
     </actions>
-    <change-notes>
-        Fix compatibility issue. Plugin is now available for IDEA 2022.1
-    </change-notes>
 </idea-plugin>

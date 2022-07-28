@@ -1,4 +1,5 @@
 # AEM Groovy Console IntelliJ Plugin
+<!-- Plugin description -->
 Adds functionality for executing groovy scripts on running AEM server from Intellij IDEA.
 
 Powered by [AEM Groovy Console](https://github.com/OlsonDigital/aem-groovy-console).
@@ -8,6 +9,8 @@ Powered by [AEM Groovy Console](https://github.com/OlsonDigital/aem-groovy-conso
 - Execute groovy scripts on running AEM server from editor
 - Script can be executed on multiple servers
 - Console output provides a link to the script's source if exception occurred
+
+<!-- Plugin description end -->
 
 ## How to use
 Plugin is available in Jetbrains plugin repository - [AEM Groovy Console](https://plugins.jetbrains.com/plugin/10893-aem-groovy-console)
