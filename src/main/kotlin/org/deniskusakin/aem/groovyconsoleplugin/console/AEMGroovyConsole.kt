@@ -1,6 +1,7 @@
 package org.deniskusakin.aem.groovyconsoleplugin.console
 
 import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.intellij.execution.executors.DefaultRunExecutor
@@ -123,7 +124,8 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
         Fuel.post("$serverHost/bin/groovyconsole/post.json", listOf(Pair("script", scriptContent)))
                 .timeout(NETWORK_TIMEOUT)
                 .timeoutRead(NETWORK_TIMEOUT)
-                .authenticate(login, password)
+                .authentication()
+                .basic(login, password)
                 .response { _, response, result ->
                     when (result) {
                         is Result.Failure -> {

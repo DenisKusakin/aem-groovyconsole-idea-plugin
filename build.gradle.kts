@@ -16,7 +16,6 @@ version = properties("pluginVersion")
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 intellij {
@@ -41,7 +40,7 @@ qodana {
 
 dependencies {
     implementation("com.google.code.gson:gson:2.8.5")
-    implementation("com.github.kittinunf.fuel:fuel:1.12.1")
+    implementation("com.github.kittinunf.fuel:fuel:2.3.1")
 }
 
 tasks {
