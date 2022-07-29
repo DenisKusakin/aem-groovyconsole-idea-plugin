@@ -6,18 +6,13 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <configurationType
-                implementation="org.deniskusakin.aem.groovyconsoleplugin.run.configuration.AemGroovyConfigurationType"/>
-        <!--<runConfigurationProducer-->
-        <!--implementation="org.deniskusakin.aem.groovyconsoleplugin.run.configuration.AemGroovyRunConfigurationProducer"/>-->
         <projectConfigurable groupId="tools"
-                             instance="org.deniskusakin.aem.groovyconsoleplugin.config.AemServersConfigurable"/>
+                             instance="org.deniskusakin.aem.groovyconsoleplugin.config.ui.AemServersConfigurable"/>
         <projectService
                 serviceImplementation="org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService"/>
         <projectService
                 serviceImplementation="org.deniskusakin.aem.groovyconsoleplugin.services.RootFoldersService"/>
         <editorNotificationProvider implementation="org.deniskusakin.aem.groovyconsoleplugin.console.EditorDecorator"/>
-        <!-- Add your extensions here -->
     </extensions>
 
     <actions>
