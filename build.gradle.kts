@@ -39,7 +39,7 @@ qodana {
 }
 
 dependencies {
-    implementation("com.google.code.gson:gson:2.8.5")
+    implementation("com.google.code.gson:gson:2.9.0")
     implementation("com.github.kittinunf.fuel:fuel:2.3.1")
 }
 
@@ -56,10 +56,6 @@ tasks {
 
     wrapper {
         gradleVersion = properties("gradleVersion")
-    }
-
-    runIde {
-        jvmArgs = listOf("-Dcompiler.process.debug.port=54795")
     }
 
     patchPluginXml {
