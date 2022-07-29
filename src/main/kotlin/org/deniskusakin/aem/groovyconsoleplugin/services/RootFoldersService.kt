@@ -1,20 +1,17 @@
 package org.deniskusakin.aem.groovyconsoleplugin.services
 
 import com.intellij.openapi.components.PersistentStateComponent
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
 import com.intellij.openapi.project.Project
 
 /**
  * @author Denis_Kusakin. 6/25/2018.
  */
-@State(
-        name = "AemGroovyScriptsRoots"
-)
+@State(name = "AemGroovyScriptsRoots")
 class RootFoldersService : PersistentStateComponent<RootFoldersService.State> {
     var myState: State = State()
 
-    override fun getState(): State? {
+    override fun getState(): State {
         return myState
     }
 

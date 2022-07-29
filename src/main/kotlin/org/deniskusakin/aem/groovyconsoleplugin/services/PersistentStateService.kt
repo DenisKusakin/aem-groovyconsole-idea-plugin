@@ -6,13 +6,11 @@ import com.intellij.openapi.components.State
 /**
  * @author Denis_Kusakin. 6/25/2018.
  */
-@State(
-        name = "AEMServers"
-)
+@State(name = "AEMServers")
 class PersistentStateService : PersistentStateComponent<PersistentStateService.State> {
     var myState: State = State()
 
-    override fun getState(): State? {
+    override fun getState(): State {
         return myState
     }
 
@@ -29,5 +27,11 @@ class PersistentStateService : PersistentStateComponent<PersistentStateService.S
     }
 
     data class State(var aemServers: MutableList<AemServerConfig> = mutableListOf())
-    data class AemServerConfig(var name: String = "", var url: String = "", var login: String = "", var password: String = "")
+    data class AemServerConfig(
+        var id: String = "",
+
+        var name: String = "",
+
+        var url: String = "",
+    )
 }

@@ -13,8 +13,8 @@ import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotifications
 import org.deniskusakin.aem.groovyconsoleplugin.actions.AemGrExecuteAction
 import org.deniskusakin.aem.groovyconsoleplugin.actions.AemGrSelectServerAction
-import org.deniskusakin.aem.groovyconsoleplugin.config.AemServersConfigurable
 import org.deniskusakin.aem.groovyconsoleplugin.config.SettingsChangedNotifier
+import org.deniskusakin.aem.groovyconsoleplugin.config.ui.AemServersConfigurable
 import org.deniskusakin.aem.groovyconsoleplugin.services.AemGroovyScriptsDetectionService
 import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 import javax.swing.JComponent

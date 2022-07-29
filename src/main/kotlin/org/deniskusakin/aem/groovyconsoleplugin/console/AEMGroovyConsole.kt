@@ -22,6 +22,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
+import org.deniskusakin.aem.groovyconsoleplugin.services.PasswordsService
 import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 import java.awt.BorderLayout
 import javax.swing.JComponent
@@ -113,12 +114,20 @@ class AEMGroovyConsole(val project: Project, val descriptor: RunContentDescripto
 
     fun execute(scriptContent: String) {
         val service = project.getService(PersistentStateService::class.java)
-        val currentServerInfo = service.getAEMServers().find { it.name == serverName }
-        val login = currentServerInfo!!.login
-        val password = currentServerInfo.password
+        val currentServerInfo = service.getAEMServers().find { it.name == serverName } ?: return
+
+        if (currentServerInfo.id.isEmpty()) return
+
+        //TODO: print message to reconfigure servers
+        val credentials = PasswordsService.getCredentials(currentServerInfo.id) ?: return
+
+        val login = credentials.userName ?: return
+        val password = credentials.getPasswordAsString() ?: return
         val serverHost = currentServerInfo.url
+
         view.clear()
         view.print("\nRunning script on $serverName\n\n", ConsoleViewContentType.LOG_WARNING_OUTPUT)
+
         RunContentManager.getInstance(project).toFrontRunContent(defaultExecutor, descriptor)
 
         Fuel.post("$serverHost/bin/groovyconsole/post.json", listOf(Pair("script", scriptContent)))
