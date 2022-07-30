@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="org.intellij.groovy">
+        <gdslScriptProvider implementation="org.deniskusakin.aem.groovyconsoleplugin.dsl.AemGDslProvider"/>
+    </extensions>
+</idea-plugin>

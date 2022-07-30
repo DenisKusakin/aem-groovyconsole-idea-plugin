@@ -1,3 +1,4 @@
+
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -56,6 +57,13 @@ tasks {
 
     wrapper {
         gradleVersion = properties("gradleVersion")
+    }
+
+    prepareSandbox {
+        from("${rootDir}/standardDsls") {
+            into("${pluginName.get()}/lib/standardDsls")
+            include("*.gdsl")
+        }
     }
 
     patchPluginXml {

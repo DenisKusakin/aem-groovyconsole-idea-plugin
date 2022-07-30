@@ -4,6 +4,7 @@
     <vendor url="https://github.com/DenisKusakin/aem-groovyconsole-idea-plugin">Denis Kusakin</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends config-file="groovy-plugin-integration.xml">org.intellij.groovy</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable groupId="tools"

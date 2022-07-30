@@ -1,0 +1,35 @@
+package standardDsls
+
+def aemScriptContext = context(scope: scriptScope(), filetypes: ['groovy'])
+
+contributor([aemScriptContext], {
+    property name: "log", type: "org.slf4j.Logger"
+    property name: "session", type: "javax.jcr.Session"
+    property name: "pageManager", type: "com.day.cq.wcm.api.PageManager"
+    property name: "resourceResolver", type: "org.apache.sling.api.resource.ResourceResolver"
+    property name: "queryBuilder", type: "com.day.cq.search.QueryBuilder"
+    property name: "nodeBuilder", type: "groovy.util.BuilderSupport"
+    property name: "pageBuilder", type: "groovy.util.BuilderSupport"
+    property name: "bundleContext", type: "org.osgi.framework.BundleContext"
+    property name: "out", type: "java.io.PrintStream"
+    property name: "slingRequest", type: "org.apache.sling.api.SlingHttpServletRequest"
+    property name: "slingResponse", type: "org.apache.sling.api.SlingHttpServletResponse"
+
+    method name: "getPage", params: [path: "java.lang.String"], type: "com.day.cq.wcm.api.Page", doc: "Get the Page for the given path, or null if it does not exist."
+    method name: "getNode", params: [path: "java.lang.String"], type: "javax.jcr.Node", doc: "Get the Node for the given path. Throws javax.jcr.RepositoryException if it does not exist."
+    method name: "getResource", params: [path: "java.lang.String"], type: "org.apache.sling.api.resource.Resource", doc: "Get the Resource for the given path, or null if it does not exist."
+    method name: "getModel", params: [path: "java.lang.String", type: "java.lang.Class"], type: "java.lang.Object", doc: "Get an instance of a Sling Model class for the Resource at the given path."
+    method name: "getService", params: [type: "java.lang.Class"], type: "java.lang.Object", doc: "Get the OSGi service instance for the given type"
+    method name: "getService", params: [className: "java.lang.String"], type: "java.lang.Object", doc: "Get the OSGi service instance for the class name"
+    method name: "getServices", params: [serviceType: "java.lang.Class", filter: "java.lang.String"], type: "java.util.List", doc: "Get OSGi services for the given type and filter expression."
+    method name: "getServices", params: [className: "java.lang.String", filter: "java.lang.String"], type: "java.util.List", doc: "Get OSGi services for the given class name and filter expression."
+    method name: "copy", params: [sourceAbsolutePath: "java.lang.String", destinationAbsolutePath: "java.lang.String"], type: "void", doc: "Groovy DSL syntax for copying a node, equivalent to calling session.workspace.copy(sourceAbsolutePath, destinationAbsolutePath)."
+    method name: "move", params: [sourceAbsolutePath: "java.lang.String", destinationAbsolutePath: "java.lang.String"], type: "void", doc: "Groovy DSL syntax for copying a node, equivalent to calling session.workspace.move(sourceAbsolutePath, destinationAbsolutePath)."
+    method name: "rename", params: [sourceAbsolutePath: "java.lang.String", destinationAbsolutePath: "java.lang.String"], type: "void", doc: "Groovy DSL syntax for renaming a node, similar to calling session.move(sourceAbsolutePath, destinationAbsolutePath) with the new node name, except that the renamed node will retain its order and the Session is saved automatically when the rename is completed."
+    method name: "save", params: [], type: "void", doc: "Save the current JCR session."
+    method name: "activate", params: [path: "java.lang.String"], type: "void", doc: "Activate the node at the given path."
+    method name: "activate", params: [path: "java.lang.String", options: "com.day.cq.replication.ReplicationOptions"], type: "void", doc: "Activate the node at the given path with supplied options."
+    method name: "deactivate", params: [path: "java.lang.String"], type: "void", doc: "Deactivate the node at the given path."
+    method name: "deactivate", params: [path: "java.lang.String", options: "com.day.cq.replication.ReplicationOptions"], type: "void", doc: "Deactivate the node at the given path with supplied options."
+    method name: "createQuery", params: [predicates: "java.utl.Map"], type: "javax.jcr.query.Query", doc: "Create a Query instance from the QueryBuilder for the current JCR session."
+})
