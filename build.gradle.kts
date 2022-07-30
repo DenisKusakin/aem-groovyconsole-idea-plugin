@@ -41,7 +41,9 @@ qodana {
 
 dependencies {
     implementation("com.google.code.gson:gson:2.9.0")
-    implementation("com.github.kittinunf.fuel:fuel:2.3.1")
+    implementation("com.github.kittinunf.fuel:fuel:2.3.1") {
+        exclude(group = "org.jetbrains.kotlin")
+    }
 }
 
 tasks {
