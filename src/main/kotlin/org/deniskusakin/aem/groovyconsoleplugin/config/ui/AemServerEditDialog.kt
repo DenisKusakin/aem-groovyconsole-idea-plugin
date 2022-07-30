@@ -40,7 +40,7 @@ class AemServerEditDialog(project: Project, private val tableItem: AemServerTabl
                 .withValidationOnApply { validateUrl(it.text) }
         }
 
-        row("Login") {
+        row("Username") {
             textField({ tableItem.user }, { tableItem.user = it })
                 .withValidationOnInput { validateNotEmpty(it.text) }
                 .withValidationOnApply { validateNotEmpty(it.text) }
