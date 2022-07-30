@@ -27,7 +27,7 @@ class AemServersTable(tableItems: List<AemServerTableItem>) : TableView<AemServe
             ListTableModel(
                 createInjectionColumnInfos(tableItems),
                 tableItems,
-                0
+                -1
             )
         )
     }

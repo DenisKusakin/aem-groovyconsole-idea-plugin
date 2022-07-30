@@ -10,14 +10,15 @@ import com.intellij.util.PlatformIcons
 import org.deniskusakin.aem.groovyconsoleplugin.config.SettingsChangedNotifier
 import org.deniskusakin.aem.groovyconsoleplugin.services.PasswordsService
 import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
+import org.deniskusakin.aem.groovyconsoleplugin.services.model.AemServerConfig
 import javax.swing.JComponent
 
 
 class AemServersConfigurable(private val project: Project) : Configurable {
 
-    private val persistentStateService = project.getService(PersistentStateService::class.java)
+    private val persistentStateService = PersistentStateService.getInstance(project)
 
-    private val aemStoredServers: Collection<PersistentStateService.AemServerConfig>
+    private val aemStoredServers: Collection<AemServerConfig>
         get() {
             return persistentStateService.getAEMServers()
         }
@@ -27,7 +28,7 @@ class AemServersConfigurable(private val project: Project) : Configurable {
             val result = mutableListOf<AemConfigUI>()
 
             for (aemServer in aemStoredServers) {
-                if (aemServer.id.isNotEmpty()) {
+                if (aemServer.id > 0) {
                     val credentials = PasswordsService.getCredentials(aemServer.id)
 
                     result.add(
@@ -60,7 +61,7 @@ class AemServersConfigurable(private val project: Project) : Configurable {
             val selectedRow = table.selectedRow
 
             if (selectedRow >= 0) {
-                table.model.removeRow(selectedRow)
+                table.model.removeRow(table.convertRowIndexToModel(selectedRow))
             }
         }
 
@@ -73,7 +74,7 @@ class AemServersConfigurable(private val project: Project) : Configurable {
                 override fun actionPerformed(e: AnActionEvent) {
                     val selectedRow = table.selectedRow
                     if (selectedRow >= 0) {
-                        val model = table.model.getItem(selectedRow)
+                        val model = table.getRow(selectedRow)
 
                         table.model.addRow(model.duplicate())
                     }
@@ -86,7 +87,7 @@ class AemServersConfigurable(private val project: Project) : Configurable {
         val selectedRow = table.selectedRow
 
         if (selectedRow >= 0) {
-            val model = table.model.getItem(selectedRow)
+            val model = table.getRow(selectedRow)
 
             if (AemServerEditDialog(project, model).showAndGet()) {
                 table.model.fireTableRowsUpdated(selectedRow, selectedRow)
@@ -111,17 +112,21 @@ class AemServersConfigurable(private val project: Project) : Configurable {
     }
 
     override fun isModified(): Boolean {
-        return table.isModified()
+        return aemStoredServers.size != table.model.items.size || table.isModified()
     }
 
     override fun apply() {
         val service = persistentStateService
 
+        aemStoredServers.forEach {
+            PasswordsService.removeCredentials(it.id)
+        }
+
         val items = table.model.items
 
         items.forEach { it.applyChanges() }
 
-        service.setAEMServers(items.map { PersistentStateService.AemServerConfig(it.id, it.name, it.url) })
+        service.setAEMServers(items.map { AemServerConfig(it.id, it.name, it.url) })
 
         items.forEach {
             PasswordsService.setCredentials(it.id, it.user, it.password)

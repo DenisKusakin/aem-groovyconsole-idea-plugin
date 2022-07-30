@@ -2,6 +2,9 @@ package org.deniskusakin.aem.groovyconsoleplugin.services
 
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
+import com.intellij.openapi.components.service
+import com.intellij.openapi.project.Project
+import org.deniskusakin.aem.groovyconsoleplugin.services.model.AemServerConfig
 
 /**
  * @author Denis_Kusakin. 6/25/2018.
@@ -18,7 +21,7 @@ class PersistentStateService : PersistentStateComponent<PersistentStateService.S
         myState = state
     }
 
-    fun getAEMServers(): Collection<AemServerConfig> {
+    fun getAEMServers(): List<AemServerConfig> {
         return myState.aemServers
     }
 
@@ -26,12 +29,12 @@ class PersistentStateService : PersistentStateComponent<PersistentStateService.S
         myState = State(servers.toMutableList())
     }
 
+    fun findById(id: Long): AemServerConfig? = getAEMServers().find { it.id == id }
+
     data class State(var aemServers: MutableList<AemServerConfig> = mutableListOf())
-    data class AemServerConfig(
-        var id: String = "",
 
-        var name: String = "",
-
-        var url: String = "",
-    )
+    companion object {
+        @JvmStatic
+        fun getInstance(project: Project): PersistentStateService = project.service()
+    }
 }

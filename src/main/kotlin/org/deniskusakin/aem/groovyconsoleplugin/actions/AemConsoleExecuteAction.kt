@@ -7,16 +7,18 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import org.deniskusakin.aem.groovyconsoleplugin.console.AEMGroovyConsole
 
-class AemGrExecuteAction : AnAction(AllIcons.Toolwindows.ToolWindowRun) {
+class AemConsoleExecuteAction : AnAction(AllIcons.Toolwindows.ToolWindowRun) {
     override fun actionPerformed(e: AnActionEvent) {
         FileDocumentManager.getInstance().saveAllDocuments()
 
         val project = e.project
         val editor = CommonDataKeys.EDITOR.getData(e.dataContext)
         val virtualFile = CommonDataKeys.VIRTUAL_FILE.getData(e.dataContext)
-        if (project == null || editor == null || virtualFile == null) return
 
-        val console = AEMGroovyConsole.getOrCreateConsole(project, virtualFile)
-        console.execute(String(virtualFile.contentsToByteArray()))
+        if (project != null && editor != null && virtualFile != null) {
+            AEMGroovyConsole.getOrCreateConsole(project, virtualFile) {
+                it.execute()
+            }
+        }
     }
 }

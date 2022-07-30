@@ -8,7 +8,7 @@ data class AemServerTableItem(private var initialConfig: AemConfigUI) {
 
     val config: AemConfigUI = initialConfig.copy()
 
-    var id: String
+    var id: Long
         get() = config.id
         set(value) {
             config.id = value
@@ -47,7 +47,6 @@ data class AemServerTableItem(private var initialConfig: AemConfigUI) {
     fun duplicate(): AemServerTableItem {
         val item = empty()
 
-        item.id = config.id
         item.name = config.name
         item.url = config.url
         item.user = config.user

@@ -13,23 +13,17 @@ import com.intellij.ide.passwordSafe.PasswordSafe
 object PasswordsService {
     private const val AEM_GROOVY_CONSOLE = "AEMGroovyConsole"
 
-    fun setCredentials(id: String, user: String, password: String) {
-        val passwordSafe = PasswordSafe.instance
-
-        val attributes = CredentialAttributes(
-            generateServiceName(AEM_GROOVY_CONSOLE, id),
-        )
-
-        passwordSafe.set(attributes, Credentials(user, password))
+    fun removeCredentials(id: Long) {
+        PasswordSafe.instance.set(credentialAttributes(id), null)
     }
 
-    fun getCredentials(id: String): Credentials? {
-        val passwordSafe = PasswordSafe.instance
-
-        val attributes = CredentialAttributes(
-            generateServiceName(AEM_GROOVY_CONSOLE, id),
-        )
-
-        return passwordSafe.get(attributes)
+    fun setCredentials(id: Long, user: String, password: String) {
+        PasswordSafe.instance.set(credentialAttributes(id), Credentials(user, password))
     }
+
+    fun getCredentials(id: Long): Credentials? = PasswordSafe.instance.get(credentialAttributes(id))
+
+    private fun credentialAttributes(id: Long) = CredentialAttributes(
+        generateServiceName(AEM_GROOVY_CONSOLE, id.toString()),
+    )
 }
