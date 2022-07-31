@@ -4,10 +4,11 @@
 ## [Unreleased]
 ## [0.3.0]
 ### Added
- - Added support for methods and bindings in groovy editor
+- Added support for methods and bindings in groovy editor
+
 ### Changed
- - Reworked Configuration UI
- - Updated storage for username/password. Need to reconfigure servers.
+- Reworked Configuration UI
+- Updated storage for username/password. Need to reconfigure servers.
 
 ## [0.2.11]
 ### Changed
