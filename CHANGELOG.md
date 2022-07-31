@@ -8,6 +8,7 @@
 ### Changed
  - Reworked Configuration UI
  - Updated storage for username/password. Need to reconfigure servers.
+
 ## [0.2.11]
 ### Changed
 - Fix compatibility issue. Plugin is now available for IDEA 2022.2
