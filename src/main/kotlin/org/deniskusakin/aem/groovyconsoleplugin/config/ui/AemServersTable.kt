@@ -14,7 +14,7 @@ import javax.swing.JTable
 import javax.swing.ListSelectionModel
 import javax.swing.table.TableCellRenderer
 
-class AemServersTable(tableItems: List<AemServerTableItem>) : TableView<AemServerTableItem>() {
+class AemServersTable(tableItems: List<AemServerConfigUI>) : TableView<AemServerConfigUI>() {
 
     init {
         autoResizeMode = JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS
@@ -31,14 +31,10 @@ class AemServersTable(tableItems: List<AemServerTableItem>) : TableView<AemServe
             )
         )
     }
-    
-    @Suppress("UNCHECKED_CAST")
-    override fun getModel(): ListTableModel<AemServerTableItem> {
-        return super.getModel() as ListTableModel<AemServerTableItem>
-    }
 
-    fun isModified(): Boolean {
-        return model.items.any { it.isModified() }
+    @Suppress("UNCHECKED_CAST")
+    override fun getModel(): ListTableModel<AemServerConfigUI> {
+        return super.getModel() as ListTableModel<AemServerConfigUI>
     }
 
     fun addDoubleClickListener(listener: () -> Unit) {
@@ -58,7 +54,7 @@ class AemServersTable(tableItems: List<AemServerTableItem>) : TableView<AemServe
         }.installOn(this)
     }
 
-    private fun createInjectionColumnInfos(items: List<AemServerTableItem>): Array<ColumnInfo<AemServerTableItem, AemServerTableItem>> {
+    private fun createInjectionColumnInfos(items: List<AemServerConfigUI>): Array<ColumnInfo<AemServerConfigUI, AemServerConfigUI>> {
         val nameCellRenderer: TableCellRenderer = createCellRenderer(text = { it.name })
         val urlCellRenderer: TableCellRenderer =
             createCellRenderer(text = { it.url }, icon = { PlatformIcons.WEB_ICON })
@@ -68,38 +64,23 @@ class AemServersTable(tableItems: List<AemServerTableItem>) : TableView<AemServe
 
         val maxName = items.map { it.name }.maxByOrNull { it.length }
         val maxUrl = items.map { it.url }.maxByOrNull { it.length }
-        val maxLogin = items.map { it.user }.maxByOrNull { it.length }
+        val maxUsername = items.map { it.user }.maxByOrNull { it.length }
 
         return arrayOf(
-            createColumnInfo(
-                "Server Name",
-                nameCellRenderer,
-                maxName
-            ) { o1, o2 -> o1.name.compareTo(o2.name) },
-            createColumnInfo(
-                "URL",
-                urlCellRenderer,
-                maxUrl
-            ) { o1, o2 -> o1.url.compareTo(o2.url) },
-            createColumnInfo(
-                "User",
-                userCellRenderer,
-                maxLogin
-            ) { o1, o2 -> o1.user.compareTo(o2.user) },
+            createColumnInfo("Server Name", nameCellRenderer, maxName),
+            createColumnInfo("URL", urlCellRenderer, maxUrl),
+            createColumnInfo("User", userCellRenderer, maxUsername)
         )
     }
 
     private fun <T> createColumnInfo(
         name: String,
         renderer: TableCellRenderer,
-        preferredStringWidthValue: String?,
-        comparator: Comparator<T>
+        preferredStringWidthValue: String?
     ): ColumnInfo<T, T> {
         return object : ColumnInfo<T, T>(name) {
 
             override fun valueOf(config: T): T = config
-
-            override fun getComparator(): Comparator<T> = comparator
 
             override fun getRenderer(config: T): TableCellRenderer = renderer
 
@@ -108,7 +89,7 @@ class AemServersTable(tableItems: List<AemServerTableItem>) : TableView<AemServe
     }
 
     private fun createCellRenderer(
-        text: (config: AemServerTableItem) -> String,
+        text: (config: AemServerConfigUI) -> String,
         icon: (() -> Icon)? = null
     ): TableCellRenderer {
         return object : TableCellRenderer {
@@ -124,7 +105,7 @@ class AemServersTable(tableItems: List<AemServerTableItem>) : TableView<AemServe
             ): Component {
                 if (value != null) {
 
-                    myLabel.text = text(value as AemServerTableItem)
+                    myLabel.text = text(value as AemServerConfigUI)
 
                     if (icon != null) {
                         myLabel.icon = icon()

@@ -14,7 +14,7 @@ import javax.swing.JPasswordField
  * User: Andrey Bardashevsky
  * Date/Time: 29.07.2022 15:45
  */
-class AemServerEditDialog(project: Project, private val tableItem: AemServerTableItem) : DialogWrapper(project) {
+class AemServerEditDialog(project: Project, private val tableItem: AemServerConfigUI) : DialogWrapper(project) {
 
     private val urlRegex = Regex(
         "https?://(www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}(\\.[a-zA-Z0-9()]{1,6})?\\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)"

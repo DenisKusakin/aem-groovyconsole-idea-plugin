@@ -1,6 +1,7 @@
 package org.deniskusakin.aem.groovyconsoleplugin.config.ui
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonShortcuts
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import com.intellij.ui.ToolbarDecorator
@@ -23,65 +24,13 @@ class AemServersConfigurable(private val project: Project) : Configurable {
             return persistentStateService.getAEMServers()
         }
 
-    private val aemConfigs: List<AemConfigUI>
-        get() {
-            val result = mutableListOf<AemConfigUI>()
+    private val persistedAemConfigs: MutableList<AemServerConfigUI>
 
-            for (aemServer in aemStoredServers) {
-                if (aemServer.id > 0) {
-                    val credentials = PasswordsService.getCredentials(aemServer.id)
-
-                    result.add(
-                        AemConfigUI(
-                            id = aemServer.id,
-                            name = aemServer.name,
-                            url = aemServer.url,
-                            user = credentials?.userName.orEmpty(),
-                            password = credentials?.getPasswordAsString().orEmpty()
-                        )
-                    )
-                }
-            }
-
-            return result
-        }
-
-    private val table: AemServersTable = AemServersTable(aemConfigs.map { AemServerTableItem(it) })
-
-    private fun addToolbarActions(toolbarDecorator: ToolbarDecorator) {
-        toolbarDecorator.setAddAction {
-            val model = AemServerTableItem.empty()
-
-            if (AemServerEditDialog(project, model).showAndGet()) {
-                table.model.addRow(model)
-            }
-        }
-
-        toolbarDecorator.setRemoveAction {
-            val selectedRow = table.selectedRow
-
-            if (selectedRow >= 0) {
-                table.model.removeRow(table.convertRowIndexToModel(selectedRow))
-            }
-        }
-
-        toolbarDecorator.setEditAction {
-            editSelectedRow()
-        }
-
-        toolbarDecorator.addExtraAction(
-            object : ToolbarDecorator.ElementActionButton("Duplicate", "Duplicate", PlatformIcons.COPY_ICON) {
-                override fun actionPerformed(e: AnActionEvent) {
-                    val selectedRow = table.selectedRow
-                    if (selectedRow >= 0) {
-                        val model = table.getRow(selectedRow)
-
-                        table.model.addRow(model.duplicate())
-                    }
-                }
-            }
-        )
+    init {
+        persistedAemConfigs = readConfigs().toMutableList()
     }
+
+    private val table: AemServersTable = AemServersTable(persistedAemConfigs.map { it.copy() })
 
     private fun editSelectedRow() {
         val selectedRow = table.selectedRow
@@ -98,9 +47,42 @@ class AemServersConfigurable(private val project: Project) : Configurable {
     override fun createComponent(): JComponent = panel {
         table.addDoubleClickListener { editSelectedRow() }
 
-        val toolbarDecorator = ToolbarDecorator.createDecorator(table).disableUpDownActions()
+        val toolbarDecorator = ToolbarDecorator.createDecorator(table).also { toolbar ->
+            toolbar.setAddAction {
+                val model = AemServerConfigUI()
 
-        addToolbarActions(toolbarDecorator)
+                if (AemServerEditDialog(project, model).showAndGet()) {
+                    table.model.addRow(model)
+                }
+            }
+
+            toolbar.setRemoveAction {
+                val selectedRow = table.selectedRow
+
+                if (selectedRow >= 0) {
+                    table.model.removeRow(table.convertRowIndexToModel(selectedRow))
+                }
+            }
+
+            toolbar.setEditAction {
+                editSelectedRow()
+            }
+
+            toolbar.addExtraAction(
+                object : ToolbarDecorator.ElementActionButton("Duplicate", "Duplicate", PlatformIcons.COPY_ICON) {
+                    override fun actionPerformed(e: AnActionEvent) {
+                        val selectedRow = table.selectedRow
+                        if (selectedRow >= 0) {
+                            val model = table.getRow(selectedRow)
+
+                            table.model.addRow(model.duplicate())
+                        }
+                    }
+                }.also { action ->
+                    action.shortcut = CommonShortcuts.getDuplicate()
+                }
+            )
+        }
 
         row {
             toolbarDecorator.createPanel()(CCFlags.grow, CCFlags.push)
@@ -112,31 +94,63 @@ class AemServersConfigurable(private val project: Project) : Configurable {
     }
 
     override fun isModified(): Boolean {
-        return aemStoredServers.size != table.model.items.size || table.isModified()
+        if (persistedAemConfigs.size != table.model.items.size) {
+            return true
+        }
+
+        for ((index, value) in persistedAemConfigs.withIndex()) {
+            if (value != table.model.items[index]) {
+                return true
+            }
+        }
+
+        return false
     }
 
     override fun apply() {
-        val service = persistentStateService
-
-        aemStoredServers.forEach {
+        persistedAemConfigs.forEach {
             PasswordsService.removeCredentials(it.id)
         }
 
         val items = table.model.items
 
-        items.forEach { it.applyChanges() }
-
-        service.setAEMServers(items.map { AemServerConfig(it.id, it.name, it.url) })
+        persistentStateService.setAEMServers(items.map { AemServerConfig(it.id, it.name, it.url) })
 
         items.forEach {
             PasswordsService.setCredentials(it.id, it.user, it.password)
         }
 
+        val newConfigs = readConfigs()
+
+        persistedAemConfigs.clear()
+        persistedAemConfigs.addAll(newConfigs)
+
         project.messageBus.syncPublisher(SettingsChangedNotifier.TOPIC).settingsChanged()
     }
 
     override fun reset() {
-        table.model.items = aemConfigs.map { AemServerTableItem(it) }
+        table.model.items = persistedAemConfigs.map { it.copy() }
     }
 
+    private fun readConfigs(): List<AemServerConfigUI> {
+        val result = mutableListOf<AemServerConfigUI>()
+
+        for (aemServer in aemStoredServers) {
+            if (aemServer.id > 0) {
+                val credentials = PasswordsService.getCredentials(aemServer.id)
+
+                result.add(
+                    AemServerConfigUI(
+                        id = aemServer.id,
+                        name = aemServer.name,
+                        url = aemServer.url,
+                        user = credentials?.userName.orEmpty(),
+                        password = credentials?.getPasswordAsString().orEmpty()
+                    )
+                )
+            }
+        }
+
+        return result
+    }
 }
