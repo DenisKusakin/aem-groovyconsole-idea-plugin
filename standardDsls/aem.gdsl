@@ -92,14 +92,14 @@ contributor([aemScriptContext]) {
             doc: 'Create a Query instance from the QueryBuilder for the current JCR session'
 }
 
-contributor([aemScriptContext, context(ctype: 'javax.servlet.ServletRequest')]) {
+contributor([context(ctype: 'javax.servlet.ServletRequest')]) {
     method name: 'getAt',
             params: [parameterName: String.name],
             type: Object.name,
             doc: 'Subscript operator to get a request parameter value.  If the value is an array, a list will be returned'
 }
 
-contributor([aemScriptContext, context(ctype: 'com.day.cq.wcm.api.Page')]) {
+contributor([context(ctype: 'com.day.cq.wcm.api.Page')]) {
     method name: 'iterator',
             type: 'java.util.Iterator<com.day.cq.wcm.api.Page>',
             doc: 'Allows usage of Groovy closure operators (<code>each</code>, <code>eachWithIndex</code>) to iterate over child pages of the current page'
@@ -116,7 +116,7 @@ contributor([aemScriptContext, context(ctype: 'com.day.cq.wcm.api.Page')]) {
             doc: 'Set the named property value on the <code>jcr:content</code> node of the current page'
 }
 
-contributor([aemScriptContext, context(ctype: 'javax.jcr.Node')]) {
+contributor([context(ctype: 'javax.jcr.Node')]) {
     method name: 'iterator',
             type: 'java.util.Iterator<com.day.cq.wcm.api.Page>',
             doc: 'Allows usage of Groovy closure operators (<code>each</code>, <code>eachWithIndex</code>) to iterate over child nodes of the current node'
@@ -146,7 +146,7 @@ contributor([aemScriptContext, context(ctype: 'javax.jcr.Node')]) {
             doc: 'Remove the child node with the given name, returning true if the node was removed'
 }
 
-contributor([aemScriptContext, context(ctype: 'javax.jcr.Binary')]) {
+contributor([context(ctype: 'javax.jcr.Binary')]) {
     method name: 'withBinary',
             params: [closure: Closure.name],
             bindsTo: it,
