@@ -29,8 +29,9 @@ class AemSelectServerAction(
         val component = e.inputEvent?.component ?: return
 
         val step = object : BaseListPopupStep<AemServerConfig>(
-            "On which server the script should be applied?",
-            persistentStateService.getAEMServers()
+            "On Which Server The Script Should Be Applied?",
+            persistentStateService.getAEMServers(),
+            Icons.AEM_ICON
         ) {
             override fun getTextFor(value: AemServerConfig): String {
                 return value.name
