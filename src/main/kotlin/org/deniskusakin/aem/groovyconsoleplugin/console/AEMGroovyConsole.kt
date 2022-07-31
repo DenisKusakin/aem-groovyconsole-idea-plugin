@@ -180,7 +180,7 @@ class AEMGroovyConsole(
                             //This code relies on fact that AEM Groovy Console uses Script1.groovy as file name, so this code is highly dangerous
                             //In some obvious cases it could work incorrectly, but it provides user with better experience
                             view.print(
-                                output.exceptionStackTrace.replace("Script1.groovy", contentFile.url),
+                                output.exceptionStackTrace.replace("Script1.groovy", contentFile.presentableUrl),
                                 ConsoleViewContentType.ERROR_OUTPUT
                             )
                         }
