@@ -7,7 +7,8 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import org.deniskusakin.aem.groovyconsoleplugin.console.AEMGroovyConsole
 
-class AemConsoleExecuteAction : AnAction(AllIcons.Toolwindows.ToolWindowRun) {
+class AemConsoleExecuteAction : AnAction(AllIcons.Actions.Execute) {
+
     override fun actionPerformed(e: AnActionEvent) {
         FileDocumentManager.getInstance().saveAllDocuments()
 
