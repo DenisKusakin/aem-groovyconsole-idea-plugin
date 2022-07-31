@@ -55,7 +55,9 @@ class AemServersTable(tableItems: List<AemServerConfigUI>) : TableView<AemServer
     }
 
     private fun createInjectionColumnInfos(items: List<AemServerConfigUI>): Array<ColumnInfo<AemServerConfigUI, AemServerConfigUI>> {
-        val nameCellRenderer: TableCellRenderer = createCellRenderer(text = { it.name })
+        val nameCellRenderer: TableCellRenderer =
+            createCellRenderer(text = { it.name }, icon = { AllIcons.Webreferences.Server })
+        
         val urlCellRenderer: TableCellRenderer =
             createCellRenderer(text = { it.url }, icon = { PlatformIcons.WEB_ICON })
 

@@ -1,5 +1,6 @@
 package org.deniskusakin.aem.groovyconsoleplugin.actions
 
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
@@ -19,7 +20,7 @@ class AemSelectServerAction(
     private val project: Project,
     private val file: VirtualFile,
     name: String
-) : AnAction(name, "AEM Server", Icons.AEM_ICON) {
+) : AnAction(name, "AEM server", AllIcons.Webreferences.Server) {
 
     private val persistentStateService by lazy {
         PersistentStateService.getInstance(project)
@@ -29,9 +30,9 @@ class AemSelectServerAction(
         val component = e.inputEvent?.component ?: return
 
         val step = object : BaseListPopupStep<AemServerConfig>(
-            "On Which Server The Script Should Be Applied?",
+            "On Which AEM Server The Script Should Be Applied?",
             persistentStateService.getAEMServers(),
-            Icons.AEM_ICON
+            AllIcons.Webreferences.Server
         ) {
             override fun getTextFor(value: AemServerConfig): String {
                 return value.name

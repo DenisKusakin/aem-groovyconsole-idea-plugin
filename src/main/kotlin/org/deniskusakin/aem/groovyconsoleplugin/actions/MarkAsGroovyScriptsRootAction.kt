@@ -3,6 +3,7 @@ package org.deniskusakin.aem.groovyconsoleplugin.actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import icons.JetgroovyIcons
 import org.deniskusakin.aem.groovyconsoleplugin.config.SettingsChangedNotifier
 import org.deniskusakin.aem.groovyconsoleplugin.services.AemGroovyScriptsDetectionService
 import org.deniskusakin.aem.groovyconsoleplugin.services.RootFoldersService
@@ -21,7 +22,7 @@ class MarkAsGroovyScriptsRootAction : AnAction() {
         } else {
             e.presentation.text = "AEM Groovy scripts root"
             e.presentation.description = "Mark directory as AEM Groovy scripts root"
-            e.presentation.icon = Icons.GROOVY_ICON
+            e.presentation.icon = JetgroovyIcons.Groovy.Groovy_16x16
         }
     }
 
