@@ -11,7 +11,7 @@ import org.deniskusakin.aem.groovyconsoleplugin.services.model.AemServerConfig
  */
 @State(name = "AEMServers")
 class PersistentStateService : PersistentStateComponent<PersistentStateService.State> {
-    var myState: State = State()
+    private var myState: State = State()
 
     override fun getState(): State {
         return myState
