@@ -1,5 +1,14 @@
 <idea-plugin>
     <extensions defaultExtensionNs="org.intellij.groovy">
+
         <gdslScriptProvider implementation="org.deniskusakin.aem.groovyconsoleplugin.dsl.AemGDslProvider"/>
+
+        <importContributor implementation="org.deniskusakin.aem.groovyconsoleplugin.dsl.AemImportContributor"/>
+        <importContributor implementation="org.deniskusakin.aem.groovyconsoleplugin.dsl.AemBuildersImportContributor"/>
+
+        <membersContributor implementation="org.deniskusakin.aem.groovyconsoleplugin.dsl.AemNodeBuilderContributor"/>
+        <membersContributor implementation="org.deniskusakin.aem.groovyconsoleplugin.dsl.AemPageBuilderContributor"/>
+
+        <variableEnhancer implementation="org.deniskusakin.aem.groovyconsoleplugin.dsl.ClosureParameterEnhancer"/>
     </extensions>
 </idea-plugin>

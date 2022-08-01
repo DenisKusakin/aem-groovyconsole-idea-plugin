@@ -9,7 +9,7 @@ Powered by [AEM Groovy Console](https://github.com/OlsonDigital/aem-groovy-conso
 - Execute groovy scripts on running AEM server from editor
 - Script can be executed on multiple servers
 - Console output provides a link to the script's source if exception occurred
-
+- Support code completion in groovy editor. **Note**: com.adobe.aem:uber-jar:x.x.x should be in project classpath to provide full code completion
 <!-- Plugin description end -->
 
 ## How to use

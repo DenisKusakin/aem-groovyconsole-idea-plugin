@@ -2,15 +2,14 @@ package standardDsls
 
 def aemScriptContext = context(scope: scriptScope(), filetypes: ['groovy'])
 
-
 contributor([aemScriptContext]) {
     property name: 'log', type: 'org.slf4j.Logger'
     property name: 'session', type: 'javax.jcr.Session'
     property name: 'pageManager', type: 'com.day.cq.wcm.api.PageManager'
     property name: 'resourceResolver', type: 'org.apache.sling.api.resource.ResourceResolver'
     property name: 'queryBuilder', type: 'com.day.cq.search.QueryBuilder'
-    property name: 'nodeBuilder', type: 'groovy.util.BuilderSupport'
-    property name: 'pageBuilder', type: 'groovy.util.BuilderSupport'
+    property name: 'nodeBuilder', type: 'com.icfolson.aem.groovy.extension.builders.NodeBuilder'
+    property name: 'pageBuilder', type: 'com.icfolson.aem.groovy.extension.builders.PageBuilder'
     property name: 'bundleContext', type: 'org.osgi.framework.BundleContext'
     property name: 'out', type: 'java.io.PrintStream'
     property name: 'slingRequest', type: 'org.apache.sling.api.SlingHttpServletRequest'

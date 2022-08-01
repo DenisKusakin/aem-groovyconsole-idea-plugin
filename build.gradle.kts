@@ -40,6 +40,7 @@ qodana {
 }
 
 dependencies {
+    implementation("com.icfolson.aem.groovy.extension:aem-groovy-extension-bundle:7.0.0")
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("com.github.kittinunf.fuel:fuel:2.3.1") {
         exclude(group = "org.jetbrains.kotlin")
