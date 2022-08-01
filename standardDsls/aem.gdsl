@@ -149,7 +149,6 @@ contributor([context(ctype: 'javax.jcr.Node')]) {
 contributor([context(ctype: 'javax.jcr.Binary')]) {
     method name: 'withBinary',
             params: [closure: Closure.name],
-            bindsTo: it,
             type: Object.name,
             doc: 'Execute the closure and automatically dispose of the binary\'s resources when the closure completes. The closure accepts a single argument with the current binary instance'
 }
