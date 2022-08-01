@@ -31,13 +31,13 @@ contributor([aemScriptContext]) {
             doc: 'Get the Resource for the given path, or null if it does not exist'
 
     method name: 'getModel',
-            type: Object.name,
             params: [path: String.name, type: Class.name],
+            type: Object.name,
             doc: 'Get an instance of a Sling Model class for the Resource at the given path'
 
     method name: 'getService',
             params: [type: Class.name],
-            type: Object,
+            type: Object.name,
             doc: 'Get the OSGi service instance for the given type'
     method name: 'getService',
             params: [className: String.name],
