@@ -2,6 +2,12 @@
 
 # aem-groovyconsole-plugin Changelog
 ## [Unreleased]
+### Changed
+- Updated UI
+- Replaced default groovy file extension with its own gconsole extension
+- Replaced External libs built-in libs in IDE
+
+
 ## [0.3.0]
 ### Added
 - Added support for methods and bindings in groovy editor

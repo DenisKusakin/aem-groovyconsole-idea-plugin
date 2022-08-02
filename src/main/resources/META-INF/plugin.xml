@@ -4,13 +4,18 @@
     <vendor url="https://github.com/DenisKusakin/aem-groovyconsole-idea-plugin">Denis Kusakin</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
     <depends config-file="groovy-plugin-integration.xml">org.intellij.groovy</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable groupId="tools"
                              instance="org.deniskusakin.aem.groovyconsoleplugin.config.ui.AemServersConfigurable"/>
+
+        <projectService serviceImplementation="org.deniskusakin.aem.groovyconsoleplugin.services.http.GroovyConsoleHttpService"/>
+
         <projectService
                 serviceImplementation="org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService"/>
+
         <projectService serviceImplementation="org.deniskusakin.aem.groovyconsoleplugin.services.RootFoldersService"/>
         <editorNotificationProvider implementation="org.deniskusakin.aem.groovyconsoleplugin.console.EditorDecorator"/>
 

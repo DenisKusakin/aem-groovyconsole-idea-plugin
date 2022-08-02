@@ -1,9 +1,5 @@
 package org.deniskusakin.aem.groovyconsoleplugin.console
 
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.extensions.authentication
-import com.github.kittinunf.result.Result
-import com.google.gson.Gson
 import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.execution.filters.RegexpFilter
 import com.intellij.execution.filters.RegexpFilter.FILE_PATH_MACROS
@@ -20,11 +16,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import org.deniskusakin.aem.groovyconsoleplugin.console.GroovyConsoleUserData.getCurrentAemConfig
-import org.deniskusakin.aem.groovyconsoleplugin.services.PasswordsService
 import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
+import org.deniskusakin.aem.groovyconsoleplugin.services.http.GroovyConsoleHttpService
+import org.deniskusakin.aem.groovyconsoleplugin.services.http.model.GroovyConsoleOutput
+import org.deniskusakin.aem.groovyconsoleplugin.services.http.model.GroovyConsoleResponseHandler
 import org.deniskusakin.aem.groovyconsoleplugin.services.model.AemServerConfig
 import java.awt.BorderLayout
-import java.util.concurrent.TimeUnit
 import javax.swing.JPanel
 
 /**
@@ -37,11 +34,59 @@ class AEMGroovyConsole(
     private val contentFile: VirtualFile,
     private val serverId: Long
 ) {
+    private val httpService = GroovyConsoleHttpService.getInstance(project)
+
+    fun execute() {
+        view.clear()
+        view.scrollTo(0)
+
+        val config = PersistentStateService.getInstance(project).findById(serverId)
+
+        if (config == null) {
+            view.print(
+                "\nAEM Config is not found for server: $serverId\n\n",
+                ConsoleViewContentType.LOG_WARNING_OUTPUT
+            )
+            return
+        }
+
+        view.print("\nRunning script on ${config.url}\n\n", ConsoleViewContentType.NORMAL_OUTPUT)
+
+        RunContentManager.getInstance(project).toFrontRunContent(defaultExecutor, descriptor)
+
+        doExecute(config)
+    }
+
+    private fun doExecute(config: AemServerConfig) {
+        httpService.execute(
+            config,
+            contentFile.contentsToByteArray(),
+            object : GroovyConsoleResponseHandler {
+                override fun onSuccess(output: GroovyConsoleOutput) {
+                    if (output.exceptionStackTrace.isBlank()) {
+                        view.print(output.output, ConsoleViewContentType.NORMAL_OUTPUT)
+                    } else {
+                        //This code relies on fact that AEM Groovy Console uses Script1.groovy as file name, so this code is highly dangerous
+                        //In some obvious cases it could work incorrectly, but it provides user with better experience
+                        view.print(
+                            output.exceptionStackTrace.replace("Script1.groovy", contentFile.presentableName),
+                            ConsoleViewContentType.ERROR_OUTPUT
+                        )
+                    }
+
+                    view.print("\nExecution Time:${output.runningTime}", ConsoleViewContentType.LOG_WARNING_OUTPUT)
+                }
+
+                override fun onFail(th: Throwable) {
+                    view.print(th.localizedMessage, ConsoleViewContentType.ERROR_OUTPUT)
+                }
+
+            }
+        )
+    }
 
     companion object {
         private val GROOVY_CONSOLES = Key.create<MutableMap<Long, AEMGroovyConsole>>("AEMGroovyConsoles")
-
-        private val NETWORK_TIMEOUT = TimeUnit.MINUTES.toMillis(10).toInt()
 
         fun getOrCreateConsole(
             project: Project,
@@ -137,105 +182,5 @@ class AEMGroovyConsole(
         private fun VirtualFile.removeConsole(serverId: Long): AEMGroovyConsole? {
             return putUserDataIfAbsent(GROOVY_CONSOLES, mutableMapOf()).remove(serverId)
         }
-    }
-
-    fun execute() {
-        val aemConfig = getCurrentConsoleAemConfig()
-
-        view.clear()
-
-        if (!isValidAemConfig(aemConfig)) return
-
-        view.print("\nRunning script on ${aemConfig!!.name}\n\n", ConsoleViewContentType.NORMAL_OUTPUT)
-
-        RunContentManager.getInstance(project).toFrontRunContent(defaultExecutor, descriptor)
-
-        doExecute(aemConfig)
-    }
-
-    private fun doExecute(aemConfig: AemServerConsoleConfig) {
-        val scriptContent = String(contentFile.contentsToByteArray())
-
-        Fuel.post("${aemConfig.url}/bin/groovyconsole/post.json", listOf(Pair("script", scriptContent)))
-            .timeout(NETWORK_TIMEOUT)
-            .timeoutRead(NETWORK_TIMEOUT)
-            .authentication()
-            .basic(aemConfig.user, aemConfig.password)
-            .response { _, response, result ->
-                when (result) {
-                    is Result.Failure -> {
-                        view.print("ERROR: \n", ConsoleViewContentType.ERROR_OUTPUT)
-                        view.print(result.getException().localizedMessage, ConsoleViewContentType.ERROR_OUTPUT)
-                    }
-
-                    is Result.Success -> {
-                        val output = Gson().fromJson(String(response.data), GroovyConsoleOutput::class.java)
-
-                        if (output.exceptionStackTrace.isBlank()) {
-                            view.print(output.output, ConsoleViewContentType.NORMAL_OUTPUT)
-                        } else {
-                            //This looks a bit weird, but it works
-                            view.scrollTo(0)
-
-                            //This code relies on fact that AEM Groovy Console uses Script1.groovy as file name, so this code is highly dangerous
-                            //In some obvious cases it could work incorrectly, but it provides user with better experience
-                            view.print(
-                                output.exceptionStackTrace.replace("Script1.groovy", contentFile.presentableUrl),
-                                ConsoleViewContentType.ERROR_OUTPUT
-                            )
-                        }
-
-                        view.print("Execution Time:${output.runningTime}", ConsoleViewContentType.LOG_WARNING_OUTPUT)
-                    }
-                }
-            }
-    }
-
-    private fun isValidAemConfig(aemConfig: AemServerConsoleConfig?): Boolean {
-        if (aemConfig == null) {
-            view.print(
-                "\nAEM Config is not found for server: $serverId\n\n",
-                ConsoleViewContentType.LOG_WARNING_OUTPUT
-            )
-
-            return false
-        }
-
-        if (aemConfig.user.isBlank() || aemConfig.password.isBlank()) {
-            view.print(
-                "\nCredentials is not specified for server: $serverId\n\n",
-                ConsoleViewContentType.LOG_WARNING_OUTPUT
-            )
-
-            return false
-        }
-
-        return true
-    }
-
-    private fun getCurrentConsoleAemConfig(): AemServerConsoleConfig? {
-        val config = PersistentStateService.getInstance(project).findById(serverId)
-
-        return config?.let {
-            val credentials = PasswordsService.getCredentials(it.id)
-
-            return AemServerConsoleConfig(
-                aemServerConfig = it,
-                user = credentials?.userName.orEmpty(),
-                password = credentials?.getPasswordAsString().orEmpty()
-            )
-        }
-    }
-
-    data class GroovyConsoleOutput(val output: String, val runningTime: String, val exceptionStackTrace: String)
-
-    data class AemServerConsoleConfig(
-        val aemServerConfig: AemServerConfig,
-        val user: String,
-        val password: String
-    ) {
-        val id: Long = aemServerConfig.id
-        val name: String = aemServerConfig.name
-        val url: String = aemServerConfig.url
     }
 }
