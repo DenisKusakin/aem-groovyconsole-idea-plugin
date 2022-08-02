@@ -5,8 +5,7 @@
 ### Changed
 - Updated UI
 - Replaced default groovy file extension with its own gconsole extension
-- Replaced External libs built-in libs in IDE
-
+- Replaced External libs with libs built-in in IDE
 
 ## [0.3.0]
 ### Added
