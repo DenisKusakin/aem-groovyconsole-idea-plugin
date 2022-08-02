@@ -118,9 +118,8 @@ class AEMGroovyConsole(
 
             val consoleView = TextConsoleBuilderFactory.getInstance()
                 .createBuilder(project)
-                .also {
-                    it.addFilter(RegexpFilter(project, "at Script1.run($FILE_PATH_MACROS:$LINE_MACROS).*"))
-                }.console
+                .filters(RegexpFilter(project, "at Script1.run($FILE_PATH_MACROS:$LINE_MACROS).*"))
+                .console
 
             val descriptor = object : RunContentDescriptor(
                 consoleView,
