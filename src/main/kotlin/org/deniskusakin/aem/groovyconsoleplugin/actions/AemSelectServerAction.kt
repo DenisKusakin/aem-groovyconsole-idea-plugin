@@ -3,58 +3,28 @@ package org.deniskusakin.aem.groovyconsoleplugin.actions
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.PopupStep
-import com.intellij.openapi.ui.popup.util.BaseListPopupStep
-import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.ui.popup.list.ListPopupImpl
-import org.deniskusakin.aem.groovyconsoleplugin.console.GroovyConsoleUserData.getCurrentAemConfig
+import com.intellij.openapi.actionSystem.CommonDataKeys
 import org.deniskusakin.aem.groovyconsoleplugin.console.GroovyConsoleUserData.setCurrentAemServerId
-import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 import org.deniskusakin.aem.groovyconsoleplugin.services.model.AemServerConfig
 
 /**
- * @author Denis_Kusakin. 6/28/2018.
+ * User: Andrey Bardashevsky
+ * Date/Time: 02.08.2022 13:32
  */
-class AemSelectServerAction(
-    private val project: Project,
-    private val file: VirtualFile,
-    name: String
-) : AnAction(name, "AEM server", AllIcons.Webreferences.Server) {
+class AemSelectServerAction(private val serverConfig: AemServerConfig) : AnAction() {
 
-    private val persistentStateService by lazy {
-        PersistentStateService.getInstance(project)
+    init {
+        templatePresentation.text = serverConfig.name
+        templatePresentation.icon = AllIcons.Webreferences.Server
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val component = e.inputEvent?.component ?: return
+        val project = e.project
+        val editor = CommonDataKeys.EDITOR.getData(e.dataContext)
+        val virtualFile = CommonDataKeys.VIRTUAL_FILE.getData(e.dataContext)
 
-        val step = object : BaseListPopupStep<AemServerConfig>(
-            "On Which AEM Server The Script Should Be Applied?",
-            persistentStateService.getAEMServers(),
-            AllIcons.Webreferences.Server
-        ) {
-            override fun getTextFor(value: AemServerConfig): String {
-                return value.name
-            }
-
-            override fun onChosen(selectedValue: AemServerConfig?, finalChoice: Boolean): PopupStep<*>? {
-                if (selectedValue != null) {
-                    file.setCurrentAemServerId(selectedValue.id)
-                }
-
-                return super.onChosen(selectedValue, finalChoice)
-            }
+        if (project != null && editor != null && virtualFile != null) {
+            virtualFile.setCurrentAemServerId(serverConfig.id)
         }
-
-        ListPopupImpl(project, step).apply {
-            showUnderneathOf(component)
-        }
-    }
-
-    override fun displayTextInToolbar(): Boolean = true
-
-    override fun update(e: AnActionEvent) {
-        e.presentation.text = file.getCurrentAemConfig(project)?.name.orEmpty()
     }
 }

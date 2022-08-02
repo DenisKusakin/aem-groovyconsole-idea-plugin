@@ -12,7 +12,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotifications
 import org.deniskusakin.aem.groovyconsoleplugin.actions.AemConsoleExecuteAction
-import org.deniskusakin.aem.groovyconsoleplugin.actions.AemSelectServerAction
+import org.deniskusakin.aem.groovyconsoleplugin.actions.AemServerChooserAction
 import org.deniskusakin.aem.groovyconsoleplugin.config.SettingsChangedNotifier
 import org.deniskusakin.aem.groovyconsoleplugin.config.ui.AemServersConfigurable
 import org.deniskusakin.aem.groovyconsoleplugin.console.GroovyConsoleUserData.getCurrentAemConfig
@@ -60,15 +60,21 @@ class EditorDecorator(project: Project) : EditorNotifications.Provider<JComponen
             }
         }
 
-        return EditorHeaderComponent().apply {
-            val execAction = AemConsoleExecuteAction().apply {
-                registerCustomShortcutSet(CommonShortcuts.CTRL_ENTER, fileEditor.component)
+        return EditorHeaderComponent().also { headerComponent ->
+            val actionGroup = DefaultActionGroup().also { actionGroup ->
+                actionGroup.add(
+                    AemConsoleExecuteAction().also {
+                        it.registerCustomShortcutSet(CommonShortcuts.CTRL_ENTER, fileEditor.component)
+                    }
+                )
+                actionGroup.addSeparator()
+                actionGroup.add(AemServerChooserAction(project))
             }
 
-            val actionGroup = DefaultActionGroup(execAction, AemSelectServerAction(project, file, currentServer.name))
-            val menu = ActionManager.getInstance().createActionToolbar("AemGroovyConsole", actionGroup, true)
+            val toolbar = ActionManager.getInstance().createActionToolbar("AemGroovyConsole", actionGroup, true)
 
-            add(menu.component)
+            toolbar.setTargetComponent(headerComponent)
+            headerComponent.add(toolbar.component)
         }
     }
 }

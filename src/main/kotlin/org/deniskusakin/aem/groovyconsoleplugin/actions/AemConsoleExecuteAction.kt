@@ -9,6 +9,10 @@ import org.deniskusakin.aem.groovyconsoleplugin.console.AEMGroovyConsole
 
 class AemConsoleExecuteAction : AnAction(AllIcons.Actions.Execute) {
 
+    init {
+        templatePresentation.text = "Run"
+    }
+    
     override fun actionPerformed(e: AnActionEvent) {
         FileDocumentManager.getInstance().saveAllDocuments()
 
