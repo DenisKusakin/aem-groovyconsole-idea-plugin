@@ -12,16 +12,18 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.application.runInEdt
+import com.intellij.openapi.progress.runBackgroundableTask
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import org.deniskusakin.aem.groovyconsoleplugin.console.GroovyConsoleUserData.getCurrentAemConfig
 import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 import org.deniskusakin.aem.groovyconsoleplugin.services.http.GroovyConsoleHttpService
-import org.deniskusakin.aem.groovyconsoleplugin.services.http.model.GroovyConsoleOutput
-import org.deniskusakin.aem.groovyconsoleplugin.services.http.model.GroovyConsoleResponseHandler
 import org.deniskusakin.aem.groovyconsoleplugin.services.model.AemServerConfig
 import java.awt.BorderLayout
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.JPanel
 
 /**
@@ -35,58 +37,68 @@ class AEMGroovyConsole(
     private val serverId: Long
 ) {
     private val httpService = GroovyConsoleHttpService.getInstance(project)
+    private val executing = AtomicBoolean(false)
 
     fun execute() {
-        view.clear()
-        view.scrollTo(0)
+        if (executing.compareAndSet(false, true)) {
+            view.clear()
+            view.scrollTo(0)
 
-        val config = PersistentStateService.getInstance(project).findById(serverId)
+            val config = PersistentStateService.getInstance(project).findById(serverId)
 
-        if (config == null) {
-            view.print(
-                "\nAEM Config is not found for server: $serverId\n\n",
-                ConsoleViewContentType.LOG_WARNING_OUTPUT
-            )
-            return
+            if (config == null) {
+                view.print(
+                    "\nAEM Config is not found for server: $serverId\n\n",
+                    ConsoleViewContentType.LOG_WARNING_OUTPUT
+                )
+                return
+            }
+
+            view.print("\nRunning script on ${config.url}\n\n", ConsoleViewContentType.NORMAL_OUTPUT)
+
+            RunContentManager.getInstance(project).toFrontRunContent(defaultExecutor, descriptor)
+
+            runBackgroundableTask("Running AEM Script on ${config.url}", project, false) {
+                doExecute(config) {
+                    executing.compareAndSet(true, false)
+                }
+            }
         }
-
-        view.print("\nRunning script on ${config.url}\n\n", ConsoleViewContentType.NORMAL_OUTPUT)
-
-        RunContentManager.getInstance(project).toFrontRunContent(defaultExecutor, descriptor)
-
-        doExecute(config)
     }
 
-    private fun doExecute(config: AemServerConfig) {
-        httpService.execute(
-            config,
-            contentFile.contentsToByteArray(),
-            object : GroovyConsoleResponseHandler {
-                override fun onSuccess(output: GroovyConsoleOutput) {
-                    if (output.exceptionStackTrace.isBlank()) {
-                        view.print(output.output, ConsoleViewContentType.NORMAL_OUTPUT)
-                    } else {
-                        //This code relies on fact that AEM Groovy Console uses Script1.groovy as file name, so this code is highly dangerous
-                        //In some obvious cases it could work incorrectly, but it provides user with better experience
-                        view.print(
-                            output.exceptionStackTrace.replace("Script1.groovy", contentFile.presentableName),
-                            ConsoleViewContentType.ERROR_OUTPUT
-                        )
-                    }
+    private fun doExecute(config: AemServerConfig, completeCallback: () -> Unit) {
+        try {
+            val output = httpService.execute(config, contentFile.contentsToByteArray())
 
-                    view.print("\nExecution Time:${output.runningTime}", ConsoleViewContentType.LOG_WARNING_OUTPUT)
+            runInEdt {
+                if (output.exceptionStackTrace.isBlank()) {
+                    view.print(output.output, ConsoleViewContentType.NORMAL_OUTPUT)
+                } else {
+                    //This code relies on fact that AEM Groovy Console uses Script1.groovy as file name, so this code is highly dangerous
+                    //In some obvious cases it could work incorrectly, but it provides user with better experience
+                    view.print(
+                        output.exceptionStackTrace.replace("Script1.groovy", contentFile.presentableName),
+                        ConsoleViewContentType.ERROR_OUTPUT
+                    )
                 }
 
-                override fun onFail(th: Throwable) {
-                    view.print(th.localizedMessage, ConsoleViewContentType.ERROR_OUTPUT)
-                }
+                view.print("\nExecution Time:${output.runningTime}", ConsoleViewContentType.LOG_WARNING_OUTPUT)
 
+                completeCallback()
             }
-        )
+        } catch (th: Throwable) {
+            runInEdt {
+                view.print(th.localizedMessage, ConsoleViewContentType.ERROR_OUTPUT)
+
+                completeCallback()
+            }
+        }
     }
 
     companion object {
         private val GROOVY_CONSOLES = Key.create<MutableMap<Long, AEMGroovyConsole>>("AEMGroovyConsoles")
+
+        private val defaultExecutor = DefaultRunExecutor.getRunExecutorInstance()
 
         fun getOrCreateConsole(
             project: Project,
@@ -108,34 +120,28 @@ class AEMGroovyConsole(
             }
         }
 
-        private val defaultExecutor = DefaultRunExecutor.getRunExecutorInstance()
-
         private fun createConsole(
             project: Project,
             contentFile: VirtualFile,
             server: AemServerConfig
         ): AEMGroovyConsole {
-
             val consoleView = TextConsoleBuilderFactory.getInstance()
                 .createBuilder(project)
                 .filters(RegexpFilter(project, "at Script1.run($FILE_PATH_MACROS:$LINE_MACROS).*"))
-                .console
+                .console.also {
+                    Disposer.register(it) { contentFile.removeConsole(server.id) }
+                }
 
-            val descriptor = object : RunContentDescriptor(
+            val descriptor = RunContentDescriptor(
                 consoleView,
                 null,
                 JPanel(BorderLayout()),
                 "${server.name}: ${contentFile.name}"
-            ) {
-                override fun dispose() {
-                    contentFile.removeConsole(server.id)
-                    super.dispose()
-                }
-            }.also {
-                it.executionId = server.id
-                it.reusePolicy = object : RunContentDescriptorReusePolicy() {
+            ).also { descr ->
+                descr.executionId = server.id
+                descr.reusePolicy = object : RunContentDescriptorReusePolicy() {
                     override fun canBeReusedBy(newDescriptor: RunContentDescriptor): Boolean =
-                        it.executionId == newDescriptor.executionId
+                        descr.executionId == newDescriptor.executionId
                 }
             }
 
