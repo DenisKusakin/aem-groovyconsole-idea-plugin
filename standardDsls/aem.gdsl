@@ -1,8 +1,29 @@
 package standardDsls
 
-def aemScriptContext = context(scope: scriptScope(), filetypes: ['groovy'])
+def aemContext(final props) {
+    final def contextProps = [:]
 
-contributor([aemScriptContext]) {
+    contextProps['filetypes'] = ['aemconsole']
+    contextProps['scope'] = props['scope'] ?: scriptScope()
+
+
+    final def type = props['ctype']
+    if (type) {
+        contextProps['ctype'] = type
+    }
+
+    return context(contextProps)
+}
+
+def aemScriptContext(final props) {
+    final def contextProps = props?.clone() ?: [:]
+
+    contextProps['scope'] = scriptScope()
+
+    return aemContext(contextProps)
+}
+
+contributor([aemScriptContext()]) {
     property name: 'log', type: 'org.slf4j.Logger'
     property name: 'session', type: 'javax.jcr.Session'
     property name: 'pageManager', type: 'com.day.cq.wcm.api.PageManager'
@@ -91,14 +112,14 @@ contributor([aemScriptContext]) {
             doc: 'Create a Query instance from the QueryBuilder for the current JCR session'
 }
 
-contributor([context(ctype: 'javax.servlet.ServletRequest')]) {
+contributor([aemScriptContext(ctype: 'javax.servlet.ServletRequest')]) {
     method name: 'getAt',
             params: [parameterName: String.name],
             type: Object.name,
             doc: 'Subscript operator to get a request parameter value.  If the value is an array, a list will be returned'
 }
 
-contributor([context(ctype: 'com.day.cq.wcm.api.Page')]) {
+contributor([aemScriptContext(ctype: 'com.day.cq.wcm.api.Page')]) {
     method name: 'iterator',
             type: 'java.util.Iterator<com.day.cq.wcm.api.Page>',
             doc: 'Allows usage of Groovy closure operators (<code>each</code>, <code>eachWithIndex</code>) to iterate over child pages of the current page'
@@ -115,7 +136,7 @@ contributor([context(ctype: 'com.day.cq.wcm.api.Page')]) {
             doc: 'Set the named property value on the <code>jcr:content</code> node of the current page'
 }
 
-contributor([context(ctype: 'javax.jcr.Node')]) {
+contributor([aemScriptContext(ctype: 'javax.jcr.Node')]) {
     method name: 'iterator',
             type: 'java.util.Iterator<com.day.cq.wcm.api.Page>',
             doc: 'Allows usage of Groovy closure operators (<code>each</code>, <code>eachWithIndex</code>) to iterate over child nodes of the current node'
@@ -145,7 +166,7 @@ contributor([context(ctype: 'javax.jcr.Node')]) {
             doc: 'Remove the child node with the given name, returning true if the node was removed'
 }
 
-contributor([context(ctype: 'javax.jcr.Binary')]) {
+contributor([aemScriptContext(ctype: 'javax.jcr.Binary')]) {
     method name: 'withBinary',
             params: [closure: Closure.name],
             type: Object.name,

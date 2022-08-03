@@ -1,6 +1,9 @@
 <idea-plugin>
     <extensions defaultExtensionNs="org.intellij.groovy">
 
+        <scriptTypeDetector
+                implementation="org.deniskusakin.aem.groovyconsoleplugin.lang.AemConsoleScriptTypeDetector"/>
+
         <gdslScriptProvider implementation="org.deniskusakin.aem.groovyconsoleplugin.dsl.AemGDslProvider"/>
 
         <importContributor implementation="org.deniskusakin.aem.groovyconsoleplugin.dsl.AemImportContributor"/>

@@ -9,6 +9,7 @@ import com.intellij.psi.PsiType
 import com.intellij.psi.ResolveState
 import com.intellij.psi.scope.PsiScopeProcessor
 import com.intellij.util.Processor
+import org.deniskusakin.aem.groovyconsoleplugin.utils.AemFileTypeUtils.isAemFile
 import org.jetbrains.plugins.groovy.builder.setContainingClass
 import org.jetbrains.plugins.groovy.lang.psi.impl.synthetic.GrLightMethodBuilder
 import org.jetbrains.plugins.groovy.lang.psi.util.GroovyCommonClassNames.GROOVY_LANG_CLOSURE
@@ -26,6 +27,7 @@ abstract class BuilderMethodsContributor : NonCodeMembersContributor() {
         state: ResolveState
     ) {
         if (clazz == null) return
+        if (!place.isAemFile()) return
         val name = ResolveUtil.getNameHint(processor) ?: return
         if (!shouldProcessDynamicMethods(processor)) return
         processDynamicMethods(clazz, name, place) { e: PsiElement? ->

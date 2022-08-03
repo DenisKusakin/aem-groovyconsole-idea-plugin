@@ -4,7 +4,7 @@
 ## [Unreleased]
 ### Changed
 - Updated UI
-- Replaced default groovy file extension with its own gconsole extension
+- Replaced default groovy file extension with plugin's extension 'aemconsole'
 - Replaced External libs with libs built-in in IDE
 
 ## [0.3.0]

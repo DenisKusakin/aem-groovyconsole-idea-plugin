@@ -4,31 +4,39 @@
     <vendor url="https://github.com/DenisKusakin/aem-groovyconsole-idea-plugin">Denis Kusakin</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.java</depends>
     <depends config-file="groovy-plugin-integration.xml">org.intellij.groovy</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <fileType name="AemConsole"
+                  extensions="aemconsole"
+                  language="Groovy"
+                  implementationClass="org.deniskusakin.aem.groovyconsoleplugin.lang.AemConsoleLanguageFileType"
+                  fieldName="INSTANCE"
+        />
+
         <projectConfigurable groupId="tools"
                              instance="org.deniskusakin.aem.groovyconsoleplugin.config.ui.AemServersConfigurable"/>
 
-        <projectService serviceImplementation="org.deniskusakin.aem.groovyconsoleplugin.services.http.GroovyConsoleHttpService"/>
+        <projectService
+                serviceImplementation="org.deniskusakin.aem.groovyconsoleplugin.services.http.GroovyConsoleHttpService"/>
 
         <projectService
                 serviceImplementation="org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService"/>
 
-        <projectService serviceImplementation="org.deniskusakin.aem.groovyconsoleplugin.services.RootFoldersService"/>
         <editorNotificationProvider implementation="org.deniskusakin.aem.groovyconsoleplugin.console.EditorDecorator"/>
 
-        <java.elementFinder implementation="org.deniskusakin.aem.groovyconsoleplugin.dsl.AemScriptExtensionClassFinder"/>
+        <java.elementFinder
+                implementation="org.deniskusakin.aem.groovyconsoleplugin.dsl.AemScriptExtensionClassFinder"/>
+
+        <internalFileTemplate name="AemConsole Script"/>
     </extensions>
 
     <actions>
-        <action
-                id="MarkAsGroovyScriptsRoot"
-                text="AEM Groovy Scripts Root"
-                description="AEM Groovy Scripts Root"
-                class="org.deniskusakin.aem.groovyconsoleplugin.actions.MarkAsGroovyScriptsRootAction">
-            <add-to-group group-id="MarkRootGroup" anchor="last"/>
+        <action id="AemConsole.NewScript" class="org.deniskusakin.aem.groovyconsoleplugin.actions.NewAemConsoleScriptAction"
+                icon="JetgroovyIcons.Groovy.GroovyFile">
+            <add-to-group group-id="NewGroup" anchor="last"/>
         </action>
     </actions>
 </idea-plugin>

@@ -1,6 +1,6 @@
 package org.deniskusakin.aem.groovyconsoleplugin.dsl
 
-import org.deniskusakin.aem.groovyconsoleplugin.dsl.Utils.isAemFile
+import org.deniskusakin.aem.groovyconsoleplugin.utils.AemFileTypeUtils.isAemFile
 import org.jetbrains.plugins.groovy.lang.psi.GroovyFile
 import org.jetbrains.plugins.groovy.lang.resolve.imports.GrImportContributor
 import org.jetbrains.plugins.groovy.lang.resolve.imports.GroovyImport

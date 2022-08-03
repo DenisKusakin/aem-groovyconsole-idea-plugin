@@ -2,6 +2,7 @@ package org.deniskusakin.aem.groovyconsoleplugin.dsl
 
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiType
+import org.deniskusakin.aem.groovyconsoleplugin.utils.AemFileTypeUtils.isAemFile
 import org.jetbrains.plugins.groovy.lang.psi.api.GrFunctionalExpression
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.arguments.GrArgumentList
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrMethodCall
@@ -21,12 +22,13 @@ class ClosureParameterEnhancer : AbstractClosureParameterEnhancer() {
     )
 
     override fun getClosureParameterType(expression: GrFunctionalExpression, index: Int): PsiType? {
+        if (!expression.isAemFile()) return null
+
         if (isCompileStatic(expression)) {
             return null
         }
 
         var parent = expression.parent
-
         if (parent is GrArgumentList) parent = parent.getParent()
         if (parent !is GrMethodCall) {
             return null

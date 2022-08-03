@@ -17,9 +17,9 @@ import org.deniskusakin.aem.groovyconsoleplugin.config.SettingsChangedNotifier
 import org.deniskusakin.aem.groovyconsoleplugin.config.ui.AemServersConfigurable
 import org.deniskusakin.aem.groovyconsoleplugin.console.GroovyConsoleUserData.getCurrentAemConfig
 import org.deniskusakin.aem.groovyconsoleplugin.console.GroovyConsoleUserData.setCurrentAemServerId
-import org.deniskusakin.aem.groovyconsoleplugin.services.AemGroovyScriptsDetectionService
 import org.deniskusakin.aem.groovyconsoleplugin.services.PersistentStateService
 import org.deniskusakin.aem.groovyconsoleplugin.services.model.AemServerConfig
+import org.deniskusakin.aem.groovyconsoleplugin.utils.AemFileTypeUtils.isAemFile
 import javax.swing.JComponent
 
 class EditorDecorator(project: Project) : EditorNotifications.Provider<JComponent>() {
@@ -40,7 +40,7 @@ class EditorDecorator(project: Project) : EditorNotifications.Provider<JComponen
     override fun getKey(): Key<JComponent> = myKey
 
     override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor, project: Project): JComponent? {
-        if (file.extension != "groovy" || !AemGroovyScriptsDetectionService.isAemGroovyFile(file.path, project)) {
+        if (!file.isAemFile()) {
             return null
         }
 
