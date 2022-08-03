@@ -58,7 +58,7 @@ class AEMGroovyConsole(
 
             RunContentManager.getInstance(project).toFrontRunContent(defaultExecutor, descriptor)
 
-            runBackgroundableTask("Running AEM Script on ${config.url}", project, false) {
+            runBackgroundableTask("Running AEM Script ${contentFile.name} on ${config.url}", project, false) {
                 doExecute(config) {
                     executing.compareAndSet(true, false)
                 }
@@ -79,7 +79,7 @@ class AEMGroovyConsole(
                     view.print(
                         output.exceptionStackTrace.replace(
                             "Script1.groovy",
-                            contentFile.presentableUrl
+                            contentFile.name
                         ),
                         ConsoleViewContentType.ERROR_OUTPUT
                     )
