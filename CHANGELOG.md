@@ -2,6 +2,8 @@
 
 # aem-groovyconsole-plugin Changelog
 ## [Unreleased]
+
+## [0.4.0]
 ### Changed
 - Updated UI
 - Replaced default groovy file extension with plugin's extension 'aemconsole'
