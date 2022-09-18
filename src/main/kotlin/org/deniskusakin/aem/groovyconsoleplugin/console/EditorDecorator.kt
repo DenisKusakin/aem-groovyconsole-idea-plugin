@@ -58,7 +58,7 @@ class EditorDecorator(private val project: Project) : EditorNotifications.Provid
         execAction.registerCustomShortcutSet(CommonShortcuts.CTRL_ENTER, fileEditor.component)
         val actionGroup = DefaultActionGroup(execAction, AemGrSelectServerAction(project, file, currentServerName))
         val menu = ActionManager.getInstance().createActionToolbar("AemGroovyConsole", actionGroup, true)
-
+        menu.targetComponent = fileEditor.component
         return EditorHeaderComponent().apply {
             add(menu.component)
         }
